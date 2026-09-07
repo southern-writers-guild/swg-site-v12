@@ -117,6 +117,10 @@
           <div style="text-align:center;margin-top:var(--sp-lg);">
             <button type="button" class="btn btn--ghost" disabled title="Coming soon" style="opacity:0.5;cursor:not-allowed;">Keep This Card — Coming Soon</button>
           </div>
+          <div style="margin-top:var(--sp-lg);padding-top:var(--sp-md);border-top:1px solid var(--text-faint);">
+            <p style="font-size:0.8rem;letter-spacing:0.04em;text-transform:uppercase;color:var(--text-faint);text-align:center;margin-bottom:var(--sp-sm);">What You Told Him</p>
+            <div id="tarot-answers-list" style="font-size:0.9rem;color:var(--text-muted);"></div>
+          </div>
         </div>
       </div>
 
@@ -244,6 +248,15 @@
         const imgEl = document.getElementById('tarot-image')
         imgEl.src = `data:${imageResult.mimeType};base64,${imageResult.data}`
         imgEl.alt = textResult.cardName
+
+        // Shown below the card itself, not on it -- the card is meant to
+        // be a clean, keepable object (see the disabled "Keep This Card"
+        // button above), so the reveal of what actually got fed to
+        // Jean-Paul lives in its own quieter block underneath rather than
+        // being permanently printed onto the card artifact.
+        document.getElementById('tarot-answers-list').innerHTML = answers.map(a => `
+          <p style="margin:0 0 10px;"><strong style="color:var(--text);font-weight:600;">${esc(a.question)}</strong><br>${esc(a.answer)}</p>
+        `).join('')
 
         loadingEl.style.display = 'none'
         resultEl.style.display = 'block'
