@@ -566,7 +566,7 @@ const WORST_CASE_ATTEMPT_MS = GEMINI_TIMEOUT_MS + 35000; // one Gemini call + vi
 const IMAGE_STYLE_REGISTERS = [
   {
     name: 'uncanny-painterly',
-    instruction: `Render this specific card in a painterly, illustrative register — closer to a serious gallery painting than a joke. Subtly uncanny and atmospheric: a little strange, restrained, mood and composition doing the work rather than any punchline. Still warm and richly colored, never haunted-house dark or desaturated — just quieter and more serious than a comic scene, the strangeness felt rather than played for laughs.`,
+    instruction: `Render this specific card in a painterly, illustrative register — closer to a serious gallery painting than a joke. Subtly uncanny and atmospheric: a little strange, restrained, mood and composition doing the work rather than any punchline. Still warm and richly colored, never haunted-house dark or desaturated — just quieter and more serious than a comic scene, the strangeness felt rather than played for laughs. No caricature here either: any face or figure keeps real, anatomically believable proportions — a strange or absurd scene is still painted straight, never with an exaggerated or distorted face standing in for the strangeness.`,
   },
   {
     name: 'comical',
