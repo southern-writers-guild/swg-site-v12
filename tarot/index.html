@@ -146,21 +146,21 @@
     }
 
     function pickThreeQuestions(all) {
-      const byCategory = {}
-      for (const q of all) {
-        if (!byCategory[q.category]) byCategory[q.category] = []
-        byCategory[q.category].push(q)
-      }
-      const categories = Object.keys(byCategory)
-      // Fisher-Yates shuffle, then take 3 distinct categories
-      for (let i = categories.length - 1; i > 0; i--) {
+      // True uniform random draw of 3 distinct questions from the full
+      // pool -- every question has an equal shot, full stop. Previously
+      // this picked one question per category (3 of 5 categories) for
+      // topic variety, but with categories of very different sizes
+      // ("object" alone is over a third of all questions) that scheme
+      // diluted new questions in the big categories toward invisibility
+      // while small categories recycled noticeably -- neither felt random.
+      // category still exists on each question in Sanity for editorial
+      // organization, it's just no longer used to constrain the draw.
+      const shuffled = [...all]
+      for (let i = shuffled.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1))
-        ;[categories[i], categories[j]] = [categories[j], categories[i]]
+        ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
       }
-      return categories.slice(0, 3).map(cat => {
-        const pool = byCategory[cat]
-        return pool[Math.floor(Math.random() * pool.length)]
-      })
+      return shuffled.slice(0, 3)
     }
 
     function renderQuestions(questions) {
