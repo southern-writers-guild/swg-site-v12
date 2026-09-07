@@ -6,6 +6,26 @@ Read this at the start of any SWG session, same as `CLAUDE.md`.
 
 ---
 
+## 2026-09-07 (later same day) — repo-desync structural fix, tarot placeholder rework, image caricature drift, running observations list
+
+**Repo-location trap strengthened (`0928c3d`).** The existing "wrong folder" warning only caught a no-git decoy folder. It didn't catch a session pointed at a different but *valid* clone of the same repo, where git looks completely normal (clean status, "everything up to date") while real commits made elsewhere are invisible to it -- which is what actually happened today (Claude Code reported nothing to push while 5 real commits sat unpushed). `CLAUDE.md` now requires every session to run `git rev-parse --show-toplevel` + `git log --oneline -1` as its first action and verify the exact full path, not just the folder name, before trusting anything git tells it.
+
+**Tarot ghost-text placeholders reworked (`6326075`).** The per-category placeholder scheme (added `b633a2c`, same day) turned out broken: a question's Sanity `category` tag means "what this question is about," not "what shape a good answer takes," so a "what color should X be" question tagged `object` got a random noun placeholder that didn't read as an answer at all. Replaced with one universal pool of lines built to work as a plausible deflecting non-answer to nearly any question, so it can't drift out of sync as the question pool grows.
+
+**Image caricature drift -- two rounds.** First round (`bc46dd6`): added an explicit caricature ban to the "comical" style register only, after a card showed exaggerated cartoon proportions. Recurred on a later card (King of Discerning Palates) that was also clearly comic in content. Realized the style register is picked at random *before* the model sees that day's answers, independent of whether the resulting scene is inherently funny -- so a wacky scene can land under the "painterly" register, which had zero caricature guidance. Second round (`2ce83f4`): added matching caricature-ban language to the painterly register too. Not yet confirmed fixed -- one recurrence after the first fix isn't enough data to call this closed; watch for a third instance.
+
+**Tarot voice: over-explained titles.** "Eight of Feathered Profanity Tutor" was within the 2-5 word hard limit but still read as one word too long -- "Tutor" just re-explained what "Feathered Profanity" already implied. Added a rule (alongside the existing pun-avoidance rule) treating a trailing redundant role/occupation word as the same over-explaining failure, with the worked example baked in.
+
+**Image voice doc: corrected a wrong note.** The doc's "OPEN QUESTION" note incorrectly implied a decision not to fix personalization bias was tied to protecting the reference images / the API key. Rick corrected this: the API key has been rotated more than once already for an unrelated reason (it leaked into code once) and that topic is closed; it was never about the reference images. Note rewritten to reflect that the actual mitigation is prompt-level (an explicit SUBJECT DIVERSITY rule against defaulting to one recurring elderly-farmer figure), not account-level.
+
+**Working-mode note from Rick (2026-09-07):** when he flags something while testing, it does not need an immediate fix every time -- log the observation, act only when it's clearly warranted. This log is where that running list lives; check here for standing observations before assuming a clean slate.
+
+**Open / watching, not yet acted on:**
+- Caricature drift in card images -- two fixes shipped today, not yet confirmed to have fully resolved it.
+- A second border-defect pattern (a uniform 4-sided white photo-mat that got through even the *original*, pre-fix all-four-edge border check) -- flagged once, not yet investigated.
+
+---
+
 ## 2026-09-07 — Jean-Paul's Tarot: timeout root cause found and fixed, forbidden-scene collisions fixed at the source, court-rank reference sets added, voice instructions tightened
 
 This session's real debugging work (git commits `2428585` through `9f1b2c8`, all 2026-09-07, confirmed on `origin/main`) was never logged here at the time — captured after the fact from git history and live-verified against the deployed code, not from memory.
