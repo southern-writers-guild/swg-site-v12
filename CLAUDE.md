@@ -27,11 +27,24 @@ Other founders: Rick West (writes as Beau Pritchett IV), MJ Polk (writes as Hank
 
 Same folder, read at the start of every session alongside this file. This file is settled technical/operational instructions; `PROJECT_LOG.md` is the running record of decisions, thinking-in-progress, and open threads that don't belong here but shouldn't be lost — written unprompted at the end of substantive conversations, not something Rick has to remember to request.
 
-## Repo location trap
+## Repo location trap — mandatory first check, every session
 
 Working repo: `C:\Users\Rick\Desktop\EZ\websites\swg-site-v12\swg-site`
 
 A decoy folder exists at `...\swg-site-v12\swg-site-v12` with no git repository in it. If git says "not a git repository," you are in the wrong folder. Do not ask Rick to hunt for it.
+
+Real, repeated incident (2026-08-19, and again 2026-09-07): a session can end up pointed at some *other* location entirely — not necessarily the documented no-git decoy above, which at least fails loudly — and, because that other location is itself a valid git clone of the same repo, everything looks normal: git responds, `git status` is clean, `git push` says "everything up to date." This is silent and dangerous specifically because it looks identical to success. On 2026-09-07 this meant a Claude Code session confidently reported nothing to push while five real commits, made by a Cowork session working directly in the real folder via the device bridge, sat unpushed and completely invisible to it.
+
+Before touching anything else, every session must run these two commands and actually check the output, not just that they ran without error:
+
+```
+git rev-parse --show-toplevel
+git log --oneline -1
+```
+
+The first line must be exactly `C:/Users/Rick/Desktop/EZ/websites/swg-site-v12/swg-site` (git normalizes backslashes to forward slashes — that's expected, not a mismatch). If it is anything else — a different path, a different casing, a parent or sibling directory — stop immediately and say so plainly rather than proceeding, even if git seems to be working fine. Folder *name* matching ("swg-site") is not sufficient — more than one clone on this machine can share that same trailing folder name; only the full path confirms it's the one real working copy. If the second line's commit doesn't match what you'd expect from the most recent work discussed in this conversation or logged in PROJECT_LOG.md, say that plainly too before assuming the repo is caught up — "nothing to push" from git is only trustworthy once the path itself is confirmed.
+
+Cowork sessions (this file read live through the device bridge, not opened as a project) mount this exact folder directly by construction — there is no separate "open the wrong clone" failure mode for them the way there is for a freshly-started Claude Code session. This check matters most for Claude Code, every time a new session or window starts.
 
 ## A separate project exists — do not mix them
 
