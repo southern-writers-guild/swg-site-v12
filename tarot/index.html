@@ -172,24 +172,37 @@
     // that would be winking at the mechanism the same way the reading voice
     // is forbidden from winking at its own jokes. Instead it just models the
     // register through example, the same "show don't explain" instinct
-    // everywhere else in this project. Keyed by category (not by individual
-    // question) so it scales for free as the question pool grows -- a new
-    // question just gets filed into one of these five existing buckets,
-    // no extra placeholder-writing required. Hardcoded here rather than in
-    // Sanity for now, at Rick's call (2026-09-07) -- can move there later if
-    // these need to be tweaked often without a code deploy.
-    const PLACEHOLDER_EXAMPLES = {
-      binary: ['only if it is a goat', 'yes to the yes', 'depends on the humidity', 'no, and I stand by that', 'fry, obviously'],
-      person: ['my uncle, God rest him', 'the detergent stocker at Walmart', 'a man named Dale, probably', 'whoever taught the goat to swear', 'mama, if we\'re being honest'],
-      object: ['earwax finally came in handy', 'a jar of something unlabeled', 'the good scissors, hidden', 'a Def Leppard shirt, obviously', 'horseradish'],
-      belief: ['grits are a lifestyle, not a food', 'kale\'s a personality test', 'the five-second rule is federal law', 'it\'s a cuke', 'ten days minimum'],
-      place: ['under the porch, don\'t ask', 'wherever the tires are buried', 'the Clackins County Walmart', 'somewhere I won\'t say why', 'the mountain house, don\'t tell your mother'],
-    }
-    const FALLBACK_PLACEHOLDERS = ['whatever\'s true, even if it\'s strange']
+    // everywhere else in this project.
+    //
+    // Originally keyed by each question's Sanity "category" field (binary/
+    // person/object/belief/place), on the assumption that category meant
+    // "shape of a good answer." It doesn't -- category is an editorial tag
+    // for what the question is ABOUT, not what a plausible answer looks
+    // like ("What color should a bathroom be?" and "What's a chore you'd
+    // pay someone else to do forever?" are both tagged "object," so both
+    // got noun placeholders like "horseradish" that don't read as answers
+    // to either question). With ~100+ questions and growing, hand-tagging
+    // every question by answer-shape isn't sustainable either. Fixed
+    // 2026-09-07 (Rick's call) by dropping category-matching and using one
+    // universal pool of lines written to read as a plausible weird
+    // non-answer to almost any question -- a deflection or a flat
+    // non-sequitur, not a literal reply -- so it can't fall out of sync
+    // with a specific question ever again.
+    const PLACEHOLDER_EXAMPLES = [
+      'depends on the humidity',
+      'only if it is a goat',
+      'no, and I stand by that',
+      'ask the goat',
+      'my uncle, God rest him',
+      'it\'s a cuke',
+      'somewhere I won\'t say why',
+      'mama, if we\'re being honest',
+      'horseradish, somehow',
+      'whatever\'s true, even if it\'s strange',
+    ]
 
-    function pickPlaceholder(category) {
-      const pool = PLACEHOLDER_EXAMPLES[category] || FALLBACK_PLACEHOLDERS
-      return pool[Math.floor(Math.random() * pool.length)]
+    function pickPlaceholder() {
+      return PLACEHOLDER_EXAMPLES[Math.floor(Math.random() * PLACEHOLDER_EXAMPLES.length)]
     }
 
     function renderQuestions(questions) {
@@ -197,7 +210,7 @@
         <div style="margin-bottom:var(--sp-md);">
           <label for="tarot-answer-${i}" style="display:block;font-family:var(--font-serif);font-size:1.1rem;margin-bottom:8px;">${esc(q.questionText)}</label>
           <input type="text" id="tarot-answer-${i}" data-question="${esc(q.questionText)}" required autocomplete="off"
-            placeholder="${esc(pickPlaceholder(q.category))}"
+            placeholder="${esc(pickPlaceholder())}"
             style="width:100%;padding:10px 14px;background:transparent;border:1px solid var(--text-faint);border-radius:6px;color:var(--text);font-size:1rem;font-family:var(--font-body);">
         </div>
       `).join('')
