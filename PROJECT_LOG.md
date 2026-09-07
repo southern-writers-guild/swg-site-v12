@@ -6,6 +6,25 @@ Read this at the start of any SWG session, same as `CLAUDE.md`.
 
 ---
 
+## 2026-09-07 — Jean-Paul's Tarot: timeout root cause found and fixed, forbidden-scene collisions fixed at the source, court-rank reference sets added, voice instructions tightened
+
+This session's real debugging work (git commits `2428585` through `9f1b2c8`, all 2026-09-07, confirmed on `origin/main`) was never logged here at the time — captured after the fact from git history and live-verified against the deployed code, not from memory.
+
+**Timeouts — real cause found, not the first guess.** The retry budget had already been raised from 3 to 6 attempts, but timeouts kept happening. Root cause (`e583f90`): a single slow or failed Gemini call was crashing the *entire* retry loop, not just costing one attempt — so "6 attempts" was really only ever 1. Fixed by wrapping transport calls so a failure retries like a content rejection already did, raising the per-call timeout to 90s to match real observed latency (was cut to 40s; real generations regularly take 60-90s+), and adding a time-budget guard so a doomed attempt is never started only to get silently killed by Vercel's hard duration cap.
+
+**Forbidden-scene collisions — fixed at the source, not just with more images (`706d6e2`).** The model was ignoring generic "pick something different" retry wording. Fixed by pre-scanning the raw answers themselves for keywords tied to each forbidden scene and handing the model a concrete, code-picked alternative from attempt 1, then a fresh targeted alternative on every retry after a real collision.
+
+**Court-rank reference sets added (`24104cf`, confirmed live `9f1b2c8`).** Queen/King draws now reach a new mature/settled reference set (5 images); Page/Knight reach a new active/youthful set (2 images); everything else keeps the original 4 (default). Forbidden-scene collision detection extends to all 7 new images, scoped per set. Rank is now decided once, client-side, and shared with both engines (previously two independent serverless calls with no way to agree on it).
+
+**Regression caught and restored (`bbb3303`).** The rare "name only, no rank" Major card (the voice document's 1-in-20 case) had been silently made impossible by the rank-in-code fix. Restored with a real code-level 1-in-20 roll (verified 5.0% over 1M local trials); on that roll, Claude gets a different prompt for a plain card name braiding all three answers, with the same noun-naming backstop plus a defensive strip against a rank word sneaking in.
+
+**Image variety — style register randomized in code (`5d4d8be`), audited clean (`040f88b`/`daa8332`).** Tone was drifting to one register; now randomized in code. A real production batch of 10 came back 7 uncanny-painterly / 3 comical, consistent with the intended ~50/50 split at scale — not a bias. (The separately-documented "Google-account personalization bias" open question in `tarotVoiceImage`, re: recurring porch/rocking-chair motifs, is still unaddressed and is a more likely explanation for any remaining variety complaints than style register.)
+
+**Voice instructions tightened same day, in Sanity (`tarotVoiceText`), not in this repo:** (1) added an explicit test for genericness/tepid readings, parallel to the existing never-name-the-answer test; (2) widened never-name-the-answer to cover numbers/quantities, not just nouns, and explicitly forbade the "[Rank] of [Suit]" naming syntax from leaking into reading prose; (3) added hard length limits — readings capped at 15-40 words, one to three sentences; Major/Court titles capped at two to five words, never a full sentence. Motivated by Rick's live testing same day (a card whose reading opened "Ten of somebody's kin..." — likely either a number-naming leak or a rank-syntax leak, both fixed since a single data point couldn't disambiguate; and readings/titles running noticeably longer than the calibration examples).
+
+---
+
+
 ## 2026-09-06 (later) — Jean-Paul's Tarot, Phases 3-4: both engines built and hardened, first real page live
 
 **Phase 3 — the two engines**, built as one shared serverless function (`api/tarot.js`, dispatched by `?engine=text|image`) rather than two separate files, since the project sits at Vercel's Hobby-plan 12-function ceiling and two new files would have broken the next deploy — same consolidation pattern as `preview-singleton.js`.
