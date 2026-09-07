@@ -570,7 +570,7 @@ const IMAGE_STYLE_REGISTERS = [
   },
   {
     name: 'comical',
-    instruction: `Render this specific card in a warm, comical register — playful, funny, a little absurd in what's actually depicted: the pose, the situation, the juxtaposition of objects. The humor should come from the scene itself, not from a flattened cartoon or comic-strip drawing style — this is still a real painted illustration, rendered with the same weight, texture, and color richness as anything else, simply funnier in content.`,
+    instruction: `Render this specific card in a warm, comical register — playful, funny, a little absurd in what's actually depicted: the pose, the situation, the juxtaposition of objects. The humor should come from the scene itself, not from a flattened cartoon or comic-strip drawing style, and not from caricature — no exaggerated, distorted, or cartoonishly oversized facial features or body proportions on any figure in the scene, human or animal. This is still a real painted illustration, rendered with the same anatomical weight, texture, and color richness as the serious register — simply funnier in content and situation, never funnier in how a face or body is drawn.`,
   },
 ];
 
