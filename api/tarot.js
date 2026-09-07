@@ -499,6 +499,17 @@ function edgeStripStats(img, side, stripSize) {
 // pure white, just an off-white/gray canvas tone. Its chroma (~10) gave it
 // away instead: virtually colorless, unlike every legitimately painted
 // edge in this card set, which always carries real hue even when dark.
+//
+// Real production case this all-four check let through: a portrait-shaped
+// scene centered on a wider canvas, pillarboxed with plain white bars down
+// the left and right sides only — top and bottom were genuine painted
+// content (a goat's horns, a countertop), so allFlat across all four was
+// false and nothing fired. A one-axis check catches that: if BOTH edges on
+// the same axis (left+right, or top+bottom) are independently flat and
+// light/colorless, that's a pillarbox or letterbox bar, full stop — no
+// coincidence required on the other two edges at all. Kept the original
+// four-edge check too since a symmetric mat doesn't necessarily trip the
+// per-axis version if all four happen to differ slightly from each other.
 function detectFlatBorder(imageBase64, mimeType) {
   if (!mimeType || !mimeType.includes('png')) {
     return { checked: false, hasBorder: false };
@@ -509,12 +520,19 @@ function detectFlatBorder(imageBase64, mimeType) {
   }
 
   const stripSize = Math.max(6, Math.round(Math.min(img.width, img.height) * 0.03));
-  const sides = ['top', 'bottom', 'left', 'right'].map(side => edgeStripStats(img, side, stripSize));
+  const [top, bottom, left, right] = ['top', 'bottom', 'left', 'right'].map(side => edgeStripStats(img, side, stripSize));
+  const sides = [top, bottom, left, right];
+  const isMat = s => s.stdDev < 10 && (s.luminance > 195 || s.chroma < 25);
+
   const allFlat = sides.every(s => s.stdDev < 10);
   const allLight = sides.every(s => s.luminance > 195);
   const allColorless = sides.every(s => s.chroma < 25);
+  const allFourMatted = allFlat && (allLight || allColorless);
 
-  return { checked: true, hasBorder: allFlat && (allLight || allColorless) };
+  const verticalBars = isMat(left) && isMat(right);
+  const horizontalBars = isMat(top) && isMat(bottom);
+
+  return { checked: true, hasBorder: allFourMatted || verticalBars || horizontalBars };
 }
 
 // Real production logs show the model's per-attempt failure rate on the
@@ -766,7 +784,7 @@ async function runImageEngine(answers, rank) {
     : '';
 
   const sceneListProse = sceneNames.map(n => `a ${n} scene`).join(', ');
-  const basePromptText = `${voice.fullText}\n\nHere are today's three raw answers:\n\n${answerBlock}\n\nGenerate one new image following every rule above. Hard requirement, checked automatically: the image itself must contain NO text, NO letters, NO numbers, and NO border or frame of any kind — not a card border, not a title, not a caption, nothing. Render only the painted scene, edge to edge. All of that (the card's name, its border) is added separately afterward by the website — if you include any of it, the image will be rejected.\n\nWatch for this specific trap: if one of today's answers literally names or strongly implies one of the forbidden reference scenes for this specific card (${sceneListProse}), do NOT paint that scene directly just because the answer mentions it. Find a different concrete object or scene that the answer evokes some other way instead — something adjacent to it, not the setting itself. Example: an answer about the beach could become a sunburn peeling, a flip-flop half-buried in a truck bed, a jar of sand on a windowsill — not a person walking on a shoreline.${collisionWarning}\n\nSTYLE FOR THIS SPECIFIC CARD, already decided, not yours to choose: ${styleRegister.instruction}\n\nColor and tone, applies no matter which style above: warm and vivid, bright and lively, not dark or heavy. Do NOT default to gray, beige, sepia, faded, dim lighting, or a muted horror-movie palette — that is a real, common mistake this exact model makes whenever a scene feels the least bit odd or uncanny, pulling toward gloom by association. Resist that pull. Look at the actual saturation in the reference images attached to this request — deep golds, saturated oranges, rich greens, vivid blues — that is the target, not a desaturated version of it. If a choice must be made between "more haunted/somber" and "more warm and vivid," always choose warm and vivid.\n\nDo not drop any of the three answers just because one is harder to render than the others — this applies especially when an answer names a real person: represent that answer's influence obliquely (an object tied to them, a silhouette, an instrument, a mood) rather than omitting it from the image entirely. All three answers must leave a real trace in the final image.\n\nIf an answer names a real brand, company, or product (a store name, a logo, a chain), do NOT render its actual logo, mascot, or signage text — that counts as text on the image and will be rejected same as any other text. Represent it obliquely instead: its color palette, the general feeling of the place, an unbranded stand-in object.\n\nConfirmed real problem in testing, not theoretical: roadside/gas-station/motel-type scenes keep growing a lit sign or storefront sign with readable letters on it, even with no brand named. Any building, vehicle, or storefront in the scene must have blank, worn, or turned-away signage — no legible words anywhere, not even an invented placeholder word. Also do not add a stylized artist signature or initials in a corner, the way a painter signs a canvas — that is text too and will be rejected.
+  const basePromptText = `${voice.fullText}\n\nHere are today's three raw answers:\n\n${answerBlock}\n\nGenerate one new image following every rule above. Hard requirement, checked automatically: the image itself must contain NO text, NO letters, NO numbers, and NO border or frame of any kind — not a card border, not a title, not a caption, nothing. Render only the painted scene, edge to edge. This includes plain blank margins, not just an ornate frame — a real production failure was a portrait-shaped scene centered on the canvas with plain white bars padding the left and right sides. If the composition does not naturally fill a square canvas edge to edge, extend the scene itself (more background, more of the setting, pull the camera back) to reach every side, rather than centering it on empty space. Do not pad the canvas with a solid color bar of any kind, on any side, however plain or subtle. All of that (the card's name, its border) is added separately afterward by the website — if you include any of it, the image will be rejected.\n\nWatch for this specific trap: if one of today's answers literally names or strongly implies one of the forbidden reference scenes for this specific card (${sceneListProse}), do NOT paint that scene directly just because the answer mentions it. Find a different concrete object or scene that the answer evokes some other way instead — something adjacent to it, not the setting itself. Example: an answer about the beach could become a sunburn peeling, a flip-flop half-buried in a truck bed, a jar of sand on a windowsill — not a person walking on a shoreline.${collisionWarning}\n\nSTYLE FOR THIS SPECIFIC CARD, already decided, not yours to choose: ${styleRegister.instruction}\n\nColor and tone, applies no matter which style above: warm and vivid, bright and lively, not dark or heavy. Do NOT default to gray, beige, sepia, faded, dim lighting, or a muted horror-movie palette — that is a real, common mistake this exact model makes whenever a scene feels the least bit odd or uncanny, pulling toward gloom by association. Resist that pull. Look at the actual saturation in the reference images attached to this request — deep golds, saturated oranges, rich greens, vivid blues — that is the target, not a desaturated version of it. If a choice must be made between "more haunted/somber" and "more warm and vivid," always choose warm and vivid.\n\nDo not drop any of the three answers just because one is harder to render than the others — this applies especially when an answer names a real person: represent that answer's influence obliquely (an object tied to them, a silhouette, an instrument, a mood) rather than omitting it from the image entirely. All three answers must leave a real trace in the final image.\n\nIf an answer names a real brand, company, or product (a store name, a logo, a chain), do NOT render its actual logo, mascot, or signage text — that counts as text on the image and will be rejected same as any other text. Represent it obliquely instead: its color palette, the general feeling of the place, an unbranded stand-in object.\n\nConfirmed real problem in testing, not theoretical: roadside/gas-station/motel-type scenes keep growing a lit sign or storefront sign with readable letters on it, even with no brand named. Any building, vehicle, or storefront in the scene must have blank, worn, or turned-away signage — no legible words anywhere, not even an invented placeholder word. Also do not add a stylized artist signature or initials in a corner, the way a painter signs a canvas — that is text too and will be rejected.
 
 FINAL RULE, ABSOLUTE, NO EXCEPTIONS: ABSOLUTELY NO text, letters, numbers, signage, or writing of any kind, anywhere in the image, under any circumstances — this includes signs, labels, tags, price stickers, license plates, book/magazine covers, screens, gauges, clocks, graffiti, embroidery, or writing reflected in glass or water. Every single generation gets checked by software for this specific thing and is thrown away and regenerated if it fails. If you are even slightly unsure whether something you're about to paint counts as text, leave it out.
 
