@@ -6,6 +6,18 @@ Read this at the start of any SWG session, same as `CLAUDE.md`.
 
 ---
 
+## 2026-09-08 (later same day) — reading counter added; Vercel invocation count checked as a stopgap
+
+Rick asked whether there's any way to see how many pulls the tarot feature has gotten. Checked first, honestly: no analytics existed anywhere in the codebase (grepped clean). Vercel's dashboard invocation count (28 today, Rick's own testing) was offered as a rough zero-build stopgap while the real thing got built.
+
+**Built the real thing (`2f5d9a5`).** A singleton Sanity document, `tarotStats` (`_id: "tarotStats"`, field `readingCount`), created and published directly via Sanity today, seeded at 0. `api/tarot.js` now bumps it by one on every successful text-engine completion — one bump per reading, not per engine call, since text and image always fire together per submission and double-counting would be worse than not counting. The write is fire-and-forget (never awaited, wrapped so a Sanity hiccup or a missing token can never fail or slow down a reading) and runs through a brand-new write-scoped client, kept deliberately separate from the existing untokened read client and from `SANITY_PREVIEW_TOKEN` (that one's scoped to preview/draft reads, not writes — mixing the two would be exactly the kind of key-scope confusion Rick's already had enough of).
+
+**No Studio schema change.** `list_workspace_schemas` showed this project's schema is Studio-deployed from a separate repo, not local to `swg-site` and not MCP-managed — so a formal `tarotStats` schema type would mean finding and touching that other Studio project. Skipped entirely: `tarotStats` needs no editorial UI, since Rick can just ask for the current count directly in chat and get a live Sanity query back, no dashboard involved.
+
+**One step only Rick can do, not yet done:** the write needs `SANITY_WRITE_TOKEN` as a Vercel environment variable — an API token with write access, created in Sanity's manage console and pasted into Vercel directly by Rick (not typed or handled by Claude, on purpose, given the API-key history on this project). Code deploys safely either way — `bumpReadingCount()` is a no-op until the token exists, so shipping this ahead of the token being set is not a risk.
+
+---
+
 ## 2026-09-08 — Tarot image failure rate: found the real mechanism, shipped the cheap fix, logged the real one
 
 Rick's actual complaint: too many readings dead-end on the first try (~5-7% by his own estimate after we talked through it, down from his first guess of ~20%). Asked to think it through properly rather than patch blind.
