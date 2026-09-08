@@ -27,6 +27,8 @@ Other founders: Rick West (writes as Beau Pritchett IV), MJ Polk (writes as Hank
 
 Same folder, read at the start of every session alongside this file. This file is settled technical/operational instructions; `PROJECT_LOG.md` is the running record of decisions, thinking-in-progress, and open threads that don't belong here but shouldn't be lost — written unprompted at the end of substantive conversations, not something Rick has to remember to request.
 
+`TAROT_REFERENCE_PULLS.md`, same folder, is different from both: a running record of actual Jean-Paul's Tarot generations Rick has flagged as hitting the voice exactly right, kept for human review only. Never read into a generation prompt or fed to the model -- the voice instructions specifically warn against reusing real outputs as examples, since the model leans on a concrete sample harder than intended instead of inventing fresh.
+
 ## Repo location trap — mandatory first check, every session
 
 Working repo: `C:\Users\Rick\Desktop\EZ\websites\swg-site-v12\swg-site`
