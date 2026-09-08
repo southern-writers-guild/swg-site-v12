@@ -40,18 +40,22 @@ function sanityWriteClient() {
   });
 }
 
-// Fire-and-forget: bumps the running total on the singleton `tarotStats`
-// document (_id: "tarotStats") by one. Never awaited by the handler and
-// never lets a Sanity hiccup, or a missing token, affect the reading
-// itself — this is a nice-to-have count, not part of the feature.
-function bumpReadingCount() {
+// Bumps the running total on the singleton `tarotStats` document
+// (_id: "tarotStats") by one. Awaited by the handler before it responds —
+// Vercel freezes the function the instant the response is sent, which
+// silently kills any in-flight network call that hasn't finished yet, so
+// a true fire-and-forget here would just never complete. Still never lets
+// a Sanity hiccup, or a missing token, affect the reading itself: errors
+// are caught and swallowed, not thrown — this is a nice-to-have count,
+// not part of the feature.
+async function bumpReadingCount() {
   const token = process.env.SANITY_WRITE_TOKEN;
   if (!token) return;
-  sanityWriteClient()
-    .patch('tarotStats')
-    .inc({ readingCount: 1 })
-    .commit()
-    .catch(err => console.error('Tarot reading-count increment failed (non-fatal):', err));
+  try {
+    await sanityWriteClient().patch('tarotStats').inc({ readingCount: 1 }).commit();
+  } catch (err) {
+    console.error('Tarot reading-count increment failed (non-fatal):', err);
+  }
 }
 
 function validateAnswers(answers) {
@@ -952,7 +956,7 @@ export default async function handler(req, res) {
   try {
     if (engine === 'text') {
       const result = await runTextEngine(answers, rankInfo.rank, rankInfo.isMajor);
-      bumpReadingCount();
+      await bumpReadingCount();
       return res.status(200).json(result);
     } else {
       const result = await runImageEngine(answers, rankInfo.rank);
