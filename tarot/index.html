@@ -100,7 +100,7 @@
       </form>
 
       <div id="tarot-loading" style="display:none;margin-top:var(--sp-lg);">
-        <p style="color:var(--text-muted);font-style:italic;">Jean-Paul is thinking it over…</p>
+        <p id="tarot-loading-text" style="color:var(--text-muted);font-style:italic;">Jean-Paul is thinking it over — give him a minute, he doesn't hurry a reading.</p>
       </div>
 
       <div id="tarot-result" style="display:none;margin-top:var(--sp-lg);">
@@ -257,6 +257,61 @@
       return data
     }
 
+    // The image engine especially can genuinely fail its first attempt --
+    // real generation latency plus content-quality checks mean the odds of
+    // a single request coming back clean are good but not certain. Rather
+    // than surface that as a visible error and make the visitor notice and
+    // click again, retry once here, silently, before ever showing a
+    // failure. Only a second failure in a row (much rarer) reaches the
+    // visible error message. Applies to both engines for the same reason,
+    // even though text rarely needs it.
+    async function callEngineWithRetry(engine, answers, rankRoll) {
+      try {
+        return await callEngine(engine, answers, rankRoll)
+      } catch (err) {
+        console.error(`Tarot ${engine} engine failed once, retrying silently:`, err)
+        setLoadingText(RETRY_LOADING_TEXT)
+        return await callEngine(engine, answers, rankRoll)
+      }
+    }
+
+    // Rotating status lines shown while the reading is in progress, in
+    // Jean-Paul's own voice -- plain, dry, never winking at what he is or
+    // referencing the mechanism underneath. Exists because the wait can
+    // genuinely run past a minute, and honest company beats a page that
+    // just looks stuck. RETRY_LOADING_TEXT swaps in specifically once a
+    // silent retry has kicked in, since that's the point the wait runs
+    // noticeably longer than usual.
+    const LOADING_MESSAGES = [
+      "Jean-Paul is thinking it over — give him a minute, he doesn't hurry a reading.",
+      "Still at it. Some cards take longer to come clear.",
+      "He's particular about what he shows you. Hang tight.",
+      "Almost there. He wants it right, not fast.",
+    ]
+    const RETRY_LOADING_TEXT = "That one gave him some trouble. Trying again — won't be long now."
+    let loadingMessageTimer = null
+
+    function setLoadingText(text) {
+      const el = document.getElementById('tarot-loading-text')
+      if (el) el.textContent = text
+    }
+
+    function startLoadingMessages() {
+      let i = 0
+      setLoadingText(LOADING_MESSAGES[0])
+      loadingMessageTimer = setInterval(() => {
+        i = (i + 1) % LOADING_MESSAGES.length
+        setLoadingText(LOADING_MESSAGES[i])
+      }, 6000)
+    }
+
+    function stopLoadingMessages() {
+      if (loadingMessageTimer) {
+        clearInterval(loadingMessageTimer)
+        loadingMessageTimer = null
+      }
+    }
+
     form.addEventListener('submit', async (e) => {
       e.preventDefault()
       errorEl.style.display = 'none'
@@ -274,12 +329,13 @@
 
       form.style.display = 'none'
       loadingEl.style.display = 'block'
+      startLoadingMessages()
 
       try {
         const rankRoll = rollRank()
         const [textResult, imageResult] = await Promise.all([
-          callEngine('text', answers, rankRoll),
-          callEngine('image', answers, rankRoll),
+          callEngineWithRetry('text', answers, rankRoll),
+          callEngineWithRetry('image', answers, rankRoll),
         ])
 
         document.getElementById('tarot-card-name').textContent = textResult.cardName
@@ -297,6 +353,7 @@
           <p style="margin:0 0 10px;"><strong style="color:var(--text);font-weight:600;">${esc(a.question)}</strong><br>${esc(a.answer)}</p>
         `).join('')
 
+        stopLoadingMessages()
         loadingEl.style.display = 'none'
         resultEl.style.display = 'block'
       } catch (err) {
@@ -305,9 +362,10 @@
         // attempt counts) means nothing to someone just trying to get a
         // reading and reads as broken rather than honest.
         console.error('Tarot reading failed:', err)
+        stopLoadingMessages()
         loadingEl.style.display = 'none'
         form.style.display = 'block'
-        showFormError(`Jean-Paul's having trouble seeing this one clearly. Try again?`)
+        showFormError(`Jean-Paul's having trouble seeing this one clearly, even on a second look. Try again?`)
       }
     })
 
