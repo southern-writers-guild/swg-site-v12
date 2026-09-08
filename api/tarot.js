@@ -25,6 +25,35 @@ function sanityClient() {
   return createClient({ projectId: PROJECT_ID, dataset: DATASET, apiVersion: API_VERSION, useCdn: true });
 }
 
+// Write client for the reading counter only. Separate from sanityClient()
+// on purpose: that one is read-only and untokened, this one needs a token
+// with write access. SANITY_WRITE_TOKEN is optional by design — if it's
+// not configured yet, bumpReadingCount() below just quietly does nothing
+// rather than ever failing or slowing down a reading.
+function sanityWriteClient() {
+  return createClient({
+    projectId: PROJECT_ID,
+    dataset: DATASET,
+    apiVersion: API_VERSION,
+    useCdn: false,
+    token: process.env.SANITY_WRITE_TOKEN,
+  });
+}
+
+// Fire-and-forget: bumps the running total on the singleton `tarotStats`
+// document (_id: "tarotStats") by one. Never awaited by the handler and
+// never lets a Sanity hiccup, or a missing token, affect the reading
+// itself — this is a nice-to-have count, not part of the feature.
+function bumpReadingCount() {
+  const token = process.env.SANITY_WRITE_TOKEN;
+  if (!token) return;
+  sanityWriteClient()
+    .patch('tarotStats')
+    .inc({ readingCount: 1 })
+    .commit()
+    .catch(err => console.error('Tarot reading-count increment failed (non-fatal):', err));
+}
+
 function validateAnswers(answers) {
   return Array.isArray(answers) && answers.length === 3 &&
     answers.every(a => a && typeof a.question === 'string' && typeof a.answer === 'string');
@@ -923,6 +952,7 @@ export default async function handler(req, res) {
   try {
     if (engine === 'text') {
       const result = await runTextEngine(answers, rankInfo.rank, rankInfo.isMajor);
+      bumpReadingCount();
       return res.status(200).json(result);
     } else {
       const result = await runImageEngine(answers, rankInfo.rank);
