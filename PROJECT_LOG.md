@@ -14,7 +14,16 @@ Rick asked whether there's any way to see how many pulls the tarot feature has g
 
 **No Studio schema change.** `list_workspace_schemas` showed this project's schema is Studio-deployed from a separate repo, not local to `swg-site` and not MCP-managed — so a formal `tarotStats` schema type would mean finding and touching that other Studio project. Skipped entirely: `tarotStats` needs no editorial UI, since Rick can just ask for the current count directly in chat and get a live Sanity query back, no dashboard involved.
 
-**One step only Rick can do, not yet done:** the write needs `SANITY_WRITE_TOKEN` as a Vercel environment variable — an API token with write access, created in Sanity's manage console and pasted into Vercel directly by Rick (not typed or handled by Claude, on purpose, given the API-key history on this project). Code deploys safely either way — `bumpReadingCount()` is a no-op until the token exists, so shipping this ahead of the token being set is not a risk. **Declined.** Rick doesn't want to deal with API tokens at all, full stop ("i dont do API codes") — closed, not deferred. The code stays as-is (harmless and inert without the token, `bumpReadingCount()` just never fires) rather than being reverted, since ripping it back out is more work than leaving a no-op in place. Don't re-propose a token-gated fix for this without a real reason to revisit.
+**One step only Rick can do, still not done — read this before doing anything else on this thread.** The write needs `SANITY_WRITE_TOKEN` as a Vercel environment variable. Code deploys safely either way: `bumpReadingCount()` (in `api/tarot.js`, commit `2f5d9a5`) is a no-op until the token exists, so it's already live and harmless.
+
+Rick initially declined this outright ("i dont do API codes") when the plan was Vercel's website dashboard — real, valid objection, not stubbornness: he's fought that exact multi-tab, wrong-environment-checkbox flow before and it always eats an hour. He then remembered `SANITY_PREVIEW_TOKEN` (this repo's private-preview build, see the entry a little further down this file, and `vercel env add ... --git-branch` used for its throwaway test override) got set up without that fight, and asked for the same approach here, on Sanity, not a pivot to a different storage provider.
+
+**Whichever Claude Code session picks this up next, per Rick's explicit request — do this, don't re-derive a plan:**
+1. Walk Rick through creating one Sanity API token: sanity.io/manage → project `fe6l0kiy` → API → Tokens → Add API token. Name it `tarot-counter`, permission **Editor** (custom scoped-down roles aren't available on this plan), no expiration. Sanity shows the value once, right after saving — that's the moment Rick needs to have it in hand.
+2. In a terminal in this repo, run `vercel env add SANITY_WRITE_TOKEN production` and have Rick paste that value at the one prompt it asks. Same mechanism already used for `SANITY_PREVIEW_TOKEN`/`SANITY_PREVIEW_SECRET` — one question, one paste, no dashboard hunting.
+3. Confirm with a real test pull afterward: query `*[_id == "tarotStats"][0]{readingCount}` in Sanity (or ask Cowork/Claude to) and check it went from 0 to 1.
+
+Don't propose the Vercel-dashboard version again, and don't pivot this to Upstash/Vercel Marketplace storage (seriously considered as an alternative this same session — free, zero-copy-paste, but Rick explicitly asked to keep it on Sanity once he placed how `SANITY_PREVIEW_TOKEN` had actually gotten set up before).
 
 ---
 
