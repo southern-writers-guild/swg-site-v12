@@ -6,6 +6,18 @@ Read this at the start of any SWG session, same as `CLAUDE.md`.
 
 ---
 
+## 2026-09-09 — First reported timeout since the retry fix; billing ruled out
+
+Rick's first pull this morning failed. Asked to check whether it was Google billing — he'd just sent a prepayment after a "frankly suspicious looking" letter from Google turned out to be real.
+
+Tested live (Cowork's built-in browser, real requests against the production `/api/tarot` endpoint, not guessed): both engines came back clean, text in 4s, image in 13s — no error, no rate limit, nothing billing-shaped. A real billing lockout doesn't clear itself overnight, so if it were that, it would still be failing now. It isn't. Couldn't pull the actual error line from the failed attempt itself (needs a Vercel dashboard login, not done on Rick's behalf), but a clean pass right now is real evidence against anything systemic.
+
+**Real signal worth keeping:** Rick's own framing — first timeout he's seen *since* the silent-retry fix shipped (`b845b25`, 2026-09-08). Consistent with the known ~5-7% single-attempt failure rate from the time-budget architecture (see the 2026-09-08 entry below) rather than a new regression — one miss on its own isn't enough to call anything broken, but worth tracking if a second one shows up soon after.
+
+Reading counter (see entry below) sat at 5 by the time this was checked, including one live test call from this session — first real confirmation the counter is tracking actual traffic, not just the manual test pulls from yesterday.
+
+---
+
 ## 2026-09-08 (later same day) — reading counter added; Vercel invocation count checked as a stopgap
 
 Rick asked whether there's any way to see how many pulls the tarot feature has gotten. Checked first, honestly: no analytics existed anywhere in the codebase (grepped clean). Vercel's dashboard invocation count (28 today, Rick's own testing) was offered as a rough zero-build stopgap while the real thing got built.
