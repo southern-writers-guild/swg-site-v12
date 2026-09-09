@@ -77,3 +77,15 @@
     });
   }
 })();
+
+(function () {
+  // Footer copyright year was static text ("© 2026 ...") baked directly
+  // into every page's HTML -- meaning it would sit wrong from the moment
+  // the calendar turned, until someone manually edited every page by hand.
+  // This corrects it to the real current year on load instead, site-wide,
+  // so it never needs a manual update again.
+  var footers = document.querySelectorAll('.footer-text');
+  for (var i = 0; i < footers.length; i++) {
+    footers[i].textContent = footers[i].textContent.replace(/©\s*\d{4}/, '© ' + new Date().getFullYear());
+  }
+})();
