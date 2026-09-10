@@ -6,6 +6,16 @@ Read this at the start of any SWG session, same as `CLAUDE.md`.
 
 ---
 
+## 2026-09-10 (3) — jp@'s "independent Google Account" was never real; corrected
+
+Rick asked where to find "the JeanPaulSWG account" — couldn't locate it, wasn't under his personal stuff. CLAUDE.md's own 2026-08-28 entry said jp@southernwritersguild.com had its own independent Google Account, anchoring the YouTube Brand Account and the shared Guild Drive. Had Rick try a real sign-in at accounts.google.com with that address: **"Couldn't find this account."** No such account exists, full stop — not a password problem, not a recovery problem.
+
+Cross-checked against real evidence rather than just taking the negative result at face value: the Guild's actual shared Drive folder (`*SHARED* SOUTHERN WRITERS GUILD`, found via Drive search earlier today while building the founder manual) is owned by Grace's personal Google account, `turtlemeatpodcast@gmail.com` — not by any jp@ identity. Asked Rick to check who really owns the Guild's YouTube channel; he confirmed directly: he does, on his own personal account.
+
+**Real conclusion:** the 2026-08-28 log entry was wrong when it was written, or described something that was planned but never actually executed — same shape as Grace's Sanity invite earlier this session (logged as done, wasn't). `jp@southernwritersguild.com` is a real, active mailbox on IONOS — that part's true — but there's no separate Google identity behind it anywhere checked so far (YouTube, the shared Drive). Corrected both places CLAUDE.md stated this as fact. **Not yet checked:** whether any *other* tool (Canva, Kit, etc.) was set up under a real jp@ Google Account — don't assume either way without checking directly, given this entry's track record.
+
+---
+
 ## 2026-09-10 (2) — Founder manual built and delivered; Creator Workstation and Proton Pass both formally dropped
 
 Rick, urgently: MJ and Grace "just looked at this thing" today, going live soon, needs a real user manual now — and separately, a genuinely simple way to protect the Guild's handful of shared passwords, explicitly not a Creator Workstation ("we walked through that at length and decided it was redundant") and not Proton Pass ("that strikes me as kind of silly too, honestly... there's three of us, we don't have that much going on... keep it as simple as possible").
