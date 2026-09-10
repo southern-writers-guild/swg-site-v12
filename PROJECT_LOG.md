@@ -6,6 +6,23 @@ Read this at the start of any SWG session, same as `CLAUDE.md`.
 
 ---
 
+## 2026-09-10 — Grace's Sanity invite: found genuinely missing, blocked from here, handed to Claude Code
+
+Rick asked for an invite to Sanity for Grace. Checked live membership first (`sanity users list --invitations`) rather than trusting the 2026-09-04 log line that already flagged this open: real result is she's not there at all, not a member, not a pending invite -- whatever went out around 2026-08-29 is gone, never turned into anything she could act on. MJ (`hank@`) is in, confirmed active, Administrator.
+
+**Whichever Claude Code session picks this up next, per Rick's explicit request -- do this, don't re-derive a plan:**
+
+Run:
+```
+sanity users invite gray@southernwritersguild.com --role administrator --project-id fe6l0kiy
+```
+
+Same pattern as MJ, same "treat all three as equal" call already on record (2026-08-29 (3) entry, further down this file) -- Administrator, not a lesser role.
+
+**Why this needed a handoff at all, worth remembering:** this Cowork session has a Sanity CLI passthrough (`run_sanity_cli`), but it's deliberately restricted to a safe subset of commands -- `users invite` isn't in it, confirmed by actually trying it, not assumed. No documented public API endpoint for email-based invites either (checked the `projects-api` and `roles` OpenAPI specs directly -- both only cover role changes for users who already exist as members, nothing for inviting a new one by email). First instinct was to offer Rick the sanity.io/manage click-path instead, framed as the easier of two options -- that was wrong. See the new line in CLAUDE.md's "Never send him hunting through a UI" rule: Claude Code is the default for anything blocked here, not a UI walkthrough offered alongside it.
+
+---
+
 ## 2026-09-09 — First reported timeout since the retry fix; billing ruled out
 
 Rick's first pull this morning failed. Asked to check whether it was Google billing — he'd just sent a prepayment after a "frankly suspicious looking" letter from Google turned out to be real.

@@ -7,7 +7,7 @@ Rick West — co-founder, project owner. Former C-level executive. Not a program
 **Communication rules — requirements, not preferences:**
 
 - Diagnose before instructing. State what you have verified and what you are assuming.
-- Never send him hunting through a UI. Work out the exact path first, or do it yourself.
+- Never send him hunting through a UI. Work out the exact path first, or do it yourself. This includes Claude Code: when a task needs a terminal, a CLI that's only authenticated there, or anything this Cowork session is blocked from doing directly, the default is a ready-to-run instruction handed to Claude Code (via Rick relaying it, or written into PROJECT_LOG.md for that session to pick up) -- not a dashboard click-path offered to Rick as the easy alternative. A UI walkthrough for Rick is the last resort, only when the task is something no session's tools can do at all (confirmed, not assumed) -- not a default offered alongside a handoff option. Real incident, 2026-09-10: offered Rick the sanity.io/manage click-path to invite a founder, framed as the simpler of two options, when handing the exact CLI command to Claude Code was the actual standing rule -- he had to say so directly.
 - No jargon. "A record," "endpoint," "environment variable," "serverless function" mean nothing to him. Plain language or don't mention it.
 - One step at a time. Wait for confirmation before the next.
 - Don't say "the whole explanation" / "that's everything." Nothing is ever the whole of something.
