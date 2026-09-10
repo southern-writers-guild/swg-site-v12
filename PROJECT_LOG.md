@@ -8,16 +8,18 @@ Read this at the start of any SWG session, same as `CLAUDE.md`.
 
 ## 2026-09-10 — Grace's Sanity invite: found genuinely missing, blocked from here, handed to Claude Code
 
-Rick asked for an invite to Sanity for Grace. Checked live membership first (`sanity users list --invitations`) rather than trusting the 2026-09-04 log line that already flagged this open: real result is she's not there at all, not a member, not a pending invite -- whatever went out around 2026-08-29 is gone, never turned into anything she could act on. MJ (`hank@`) is in, confirmed active, Administrator.
+Rick asked for an invite to Sanity for Grace. Checked live membership first (`sanity users list --invitations`) rather than trusting the 2026-09-04 log line that already flagged this open: real result is she's not there at all, not a member, not a pending invite -- whatever went out around 2026-08-29 is gone, never turned into anything she could act on. MJ is in, confirmed active, Administrator, showing as "Mikie Pdizzle."
+
+**Real correction caught mid-task, worth remembering:** first draft of this used `gray@southernwritersguild.com`, matching the Guild-branded address pattern from the 2026-08-28 "Going Pro" plan (step 4: each founder signs into everything with a dedicated `@southernwritersguild.com` Google account). Rick caught this before it went out -- the actual, agreed-on pattern is each founder's own existing personal Google login, not a new Guild-branded account. MJ showing as "Mikie Pdizzle" (not "hank" or "MJ Polk") is consistent with this being how MJ's own invite already worked, not a new decision. **The Going Pro plan's step 4 is stale against what's actually happening and should be revisited, not assumed correct, next time it comes up.** Grace's real address, confirmed by Rick directly: `turtlemeatpodcast@gmail.com`.
 
 **Whichever Claude Code session picks this up next, per Rick's explicit request -- do this, don't re-derive a plan:**
 
 Run:
 ```
-sanity users invite gray@southernwritersguild.com --role administrator --project-id fe6l0kiy
+sanity users invite turtlemeatpodcast@gmail.com --role administrator --project-id fe6l0kiy
 ```
 
-Same pattern as MJ, same "treat all three as equal" call already on record (2026-08-29 (3) entry, further down this file) -- Administrator, not a lesser role.
+Same "treat all three as equal" call already on record (2026-08-29 (3) entry, further down this file) -- Administrator, not a lesser role.
 
 **Why this needed a handoff at all, worth remembering:** this Cowork session has a Sanity CLI passthrough (`run_sanity_cli`), but it's deliberately restricted to a safe subset of commands -- `users invite` isn't in it, confirmed by actually trying it, not assumed. No documented public API endpoint for email-based invites either (checked the `projects-api` and `roles` OpenAPI specs directly -- both only cover role changes for users who already exist as members, nothing for inviting a new one by email). First instinct was to offer Rick the sanity.io/manage click-path instead, framed as the easier of two options -- that was wrong. See the new line in CLAUDE.md's "Never send him hunting through a UI" rule: Claude Code is the default for anything blocked here, not a UI walkthrough offered alongside it.
 
