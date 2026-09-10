@@ -6,6 +6,18 @@ Read this at the start of any SWG session, same as `CLAUDE.md`.
 
 ---
 
+## 2026-09-10 (4) — Open: whether the Guild needs its own independent Google Account, and how mail routing works today
+
+Not acting tonight — Rick flagged this to go on the list, not to be built now.
+
+**The real question, in his words:** whether or not the Guild needs an independent Google Account (not tied to any one founder personally — same governing principle as everything else: owned by the entity, not a person), and if so, how to actually set one up that way. Walked through one real method this session (create the account using `jp@southernwritersguild.com` as its own sign-in address, via "use my current email instead" during signup, rather than a new @gmail.com address) — technically sound, not yet acted on.
+
+**New real fact, worth keeping:** right now, IONOS is set up to forward `jp@southernwritersguild.com` mail to Rick's own personal inbox. That means MJ and Grace currently have no way to see mail sent to `jp@` at all — whatever comes in only reaches Rick. This is presumably part of why a shared, independent identity feels worth solving, not just a nice-to-have.
+
+**Open, not decided:** (1) does the Guild need this at all, or is routing everything through personal accounts (the pattern already settled for Sanity/GitHub/Vercel/Canva) good enough here too; (2) if yes, build it as described above; (3) where should `jp@` mail actually land so all three founders can see it — options nobody's evaluated yet include IONOS forwarding to all three personal inboxes instead of just Rick's, a real shared inbox the independent Google Account would provide on its own, or something else.
+
+---
+
 ## 2026-09-10 (3) — jp@'s "independent Google Account" was never real; corrected
 
 Rick asked where to find "the JeanPaulSWG account" — couldn't locate it, wasn't under his personal stuff. CLAUDE.md's own 2026-08-28 entry said jp@southernwritersguild.com had its own independent Google Account, anchoring the YouTube Brand Account and the shared Guild Drive. Had Rick try a real sign-in at accounts.google.com with that address: **"Couldn't find this account."** No such account exists, full stop — not a password problem, not a recovery problem.
