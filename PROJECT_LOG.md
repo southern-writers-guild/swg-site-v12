@@ -6,6 +6,12 @@ Read this at the start of any SWG session, same as `CLAUDE.md`.
 
 ---
 
+## 2026-09-10 — Grace's Sanity invite: sent, confirmed pending
+
+Picked up the handoff below. Checked live membership again first, same as the prior session did -- `turtlemeatpodcast@gmail.com` still not a member, not pending, confirming nothing had changed since. Ran the exact command logged, no re-derivation. Verified after: she now shows as `<pending>`, Administrator, dated 2026-09-10, in `sanity users list --invitations`. She still has to accept it on her end -- that part isn't something this session can do or check.
+
+---
+
 ## 2026-09-10 — Grace's Sanity invite: found genuinely missing, blocked from here, handed to Claude Code
 
 Rick asked for an invite to Sanity for Grace. Checked live membership first (`sanity users list --invitations`) rather than trusting the 2026-09-04 log line that already flagged this open: real result is she's not there at all, not a member, not a pending invite -- whatever went out around 2026-08-29 is gone, never turned into anything she could act on. MJ is in, confirmed active, Administrator, showing as "Mikie Pdizzle."
