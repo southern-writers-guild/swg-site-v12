@@ -1,5 +1,7 @@
 # Southern Writers Guild — Sanity Editing Guide
 
+*Technical companion for future sessions working on this repo. The actual founder-facing manual — sign-in, Presentation Tool, every content type, what's off limits — is `SWG_Editing_The_Website.md`, a Google Doc in the Guild's shared Drive folder (`*SHARED* SOUTHERN WRITERS GUILD`), built 2026-09-10. This file's Porch Story detail below is still accurate and folded into that doc; keep the two in sync if either changes.*
+
 Where to go: **swg-studio.sanity.studio**. Sign in, click **Porch Story** on the left to see every story, or click **Create** to start a new one.
 
 ## Starting a new story
