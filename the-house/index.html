@@ -23,12 +23,17 @@
     /* Centers the Mission/Goals block on real desktop screens only --
        1025px and wider, just above the standard 1024px iPad-landscape
        width, so every phone and tablet, either way you hold it, stays
-       pixel-identical to today. Text width itself is untouched; this
-       only splits the leftover space evenly on both sides instead of
-       leaving it stacked on the right. Same 720px width the Events
-       page already uses for the same purpose (--content-w). */
+       pixel-identical to today. Widened to a 76-character line (still
+       inside WCAG's 80-character ceiling for Latin text) so the text
+       itself fills the centered box on a real desktop screen instead
+       of leaving a second, smaller gap inside it -- both the box and
+       the text now use the same 76ch width, so there's nothing left
+       over between them. Overrides swg.css's sitewide 66ch .prose
+       cap for this section only; the manifesto/guidelines/Porch
+       pages that cap is locked for are untouched. */
     @media (min-width: 1025px) {
-      .mission-inner { max-width: var(--content-w); margin: 0 auto; }
+      .mission-inner { max-width: 76ch; margin: 0 auto; }
+      .mission-inner .prose { max-width: 76ch; }
     }
     .goals-list li {
       list-style: decimal;
