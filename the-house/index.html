@@ -20,6 +20,16 @@
     .mission-section .section-label ~ .section-label {
       margin-top: 8px;
     }
+    /* Centers the Mission/Goals block on real desktop screens only --
+       1025px and wider, just above the standard 1024px iPad-landscape
+       width, so every phone and tablet, either way you hold it, stays
+       pixel-identical to today. Text width itself is untouched; this
+       only splits the leftover space evenly on both sides instead of
+       leaving it stacked on the right. Same 720px width the Events
+       page already uses for the same purpose (--content-w). */
+    @media (min-width: 1025px) {
+      .mission-inner { max-width: var(--content-w); margin: 0 auto; }
+    }
     .goals-list li {
       list-style: decimal;
       margin-left: 0.5rem;
@@ -241,16 +251,18 @@
   </nav>
 
   <div class="mission-section">
-    <p class="section-label" id="section-label-mission">Mission</p>
-    <div class="section-rule"></div>
-    <div class="prose" id="mission-body">
-      <p style="color:var(--text-faint);font-size:0.85rem;">Loading…</p>
-    </div>
+    <div class="mission-inner">
+      <p class="section-label" id="section-label-mission">Mission</p>
+      <div class="section-rule"></div>
+      <div class="prose" id="mission-body">
+        <p style="color:var(--text-faint);font-size:0.85rem;">Loading…</p>
+      </div>
 
-    <p class="section-label" id="section-label-goals">Organizational Goals</p>
-    <div class="section-rule"></div>
-    <div class="prose" id="goals-body">
-      <p style="color:var(--text-faint);font-size:0.85rem;">Loading…</p>
+      <p class="section-label" id="section-label-goals">Organizational Goals</p>
+      <div class="section-rule"></div>
+      <div class="prose" id="goals-body">
+        <p style="color:var(--text-faint);font-size:0.85rem;">Loading…</p>
+      </div>
     </div>
   </div>
 
