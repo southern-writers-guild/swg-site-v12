@@ -33,7 +33,12 @@
        pages that cap is locked for are untouched. */
     @media (min-width: 1025px) {
       .mission-inner { max-width: 76ch; margin: 0 auto; }
-      .mission-inner .prose { max-width: 76ch; }
+      .mission-inner .prose { max-width: 76ch; font-size: 1.35rem; }
+      /* swg.css sets the opening paragraph's size directly, which
+         otherwise wins over the line above -- repeated here so the
+         whole block (including the first paragraph) is the same
+         size on desktop, not just the paragraphs after it. */
+      .mission-inner .prose p:first-child { font-size: 1.35rem; }
     }
     .goals-list li {
       list-style: decimal;
