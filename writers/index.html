@@ -185,13 +185,14 @@
     // of who occupies which slot, so reordering in Studio just works.
     function renderPairedSection(w, alignLeft, labels) {
       const pos = photoPosition(w.characterPhotoHotspot)
+      const avatarPos = photoPosition(w.avatarPhotoHotspot)
       const href = `/writers/${esc(w.slug)}/`
       const photo = `
         <div class="char-col">
           <a href="${href}" class="char-photo-wrap" style="display:block;">
             <img src="${esc(w.characterPhotoUrl || '')}" alt="${esc(w.characterName)}" data-sanity="${esc(sanityImageDataAttr(w, 'writer', 'characterPhoto'))}" style="object-position:${pos};">
           </a>
-          <div class="writer-avatar"><img src="${esc(w.avatarPhotoUrl || '')}" alt="${esc(w.realName || '')}" data-sanity="${esc(sanityImageDataAttr(w, 'writer', 'avatarPhoto'))}"></div>
+          <div class="writer-avatar"><img src="${esc(w.avatarPhotoUrl || '')}" alt="${esc(w.realName || '')}" data-sanity="${esc(sanityImageDataAttr(w, 'writer', 'avatarPhoto'))}" style="object-position:${avatarPos};"></div>
         </div>`
       const text = `
         <div class="writer-col">

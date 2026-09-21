@@ -309,6 +309,7 @@
         "characterPhotoUrl": characterPhoto.asset->url,
         "characterPhotoHotspot": characterPhoto.hotspot,
         "avatarPhotoUrl": avatarPhoto.asset->url,
+        "avatarPhotoHotspot": avatarPhoto.hotspot,
         links`
 
    export async function fetchWriters() {
