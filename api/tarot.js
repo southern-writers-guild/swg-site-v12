@@ -828,6 +828,18 @@ SECOND FINAL RULE, ABSOLUTE, NO EXCEPTIONS: if any of today's three answers rese
   let lastViolation = '';
   let lastForbiddenCategory = '';
 
+  // Added 2026-09-21, real incident: both of Rick's back-to-back failed
+  // pulls that night burned all 6 attempts on the same reason -- visible
+  // text/numbers/a border -- and the retry feedback below was giving that
+  // specific failure only a generic "try again, avoid that" nudge, while a
+  // forbidden-scene rejection already got named explicitly with a concrete
+  // alternative. Same lesson as everywhere else in this file: a model told
+  // to "avoid it" generically doesn't reliably self-correct; naming the
+  // exact problem does. This tracks a text/border rejection the same way
+  // lastForbiddenCategory already tracks a scene rejection, so the retry
+  // feedback below can call it out specifically instead of generically.
+  let lastHadTextOrBorder = false;
+
   for (let attempt = 1; attempt <= MAX_IMAGE_ATTEMPTS; attempt++) {
     // Real evidence from today's testing: a slow or failed connection to
     // Gemini on a single attempt used to crash this whole function
@@ -852,9 +864,26 @@ SECOND FINAL RULE, ABSOLUTE, NO EXCEPTIONS: if any of today's three answers rese
     // alternative for that exact category. A different idea than any
     // pre-generation suggestion, or than a previous retry's, since it's
     // picked fresh from the list each time.
-    const retryFeedback = lastForbiddenCategory
-      ? `Your previous attempt was rejected: ${lastViolation}. You painted the literal "${lastForbiddenCategory}" scene again — stop defaulting to it. Concrete alternative idea for this retry, already chosen for you — you may adapt it, but do not paint ${lastForbiddenCategory} instead: ${pickSafeIdea(setKey, lastForbiddenCategory)}.`
-      : `Your previous attempt was rejected: ${lastViolation}. Generate a genuinely different image that avoids that problem entirely.`;
+    // Built as separate, stackable pieces rather than one either/or string
+    // -- a single attempt can fail for more than one reason at once (a
+    // border AND a forbidden scene, say), and each real reason deserves
+    // its own specific, concrete correction rather than one picking a
+    // "more important" violation and staying silent on the other.
+    const feedbackParts = [`Your previous attempt was rejected: ${lastViolation}.`];
+    if (lastHadTextOrBorder) {
+      feedbackParts.push(
+        `Specifically: no text, letters, numbers, or a border/frame — none, anywhere, not even a single word or a name. If one of today's three answers is a name, a word, or a title, do NOT paint it as legible text anywhere in the scene, even on an object where a real name would normally appear (a boat's hull, a collar tag, a sign) -- represent it obliquely instead, the same way a real person's name or a real brand name must already be handled: an object tied to it, a color, a shape, a mood. Nothing spelled out, nothing readable, no exceptions this retry.`
+      );
+    }
+    if (lastForbiddenCategory) {
+      feedbackParts.push(
+        `You also painted the literal "${lastForbiddenCategory}" scene again — stop defaulting to it. Concrete alternative idea for this retry, already chosen for you — you may adapt it, but do not paint ${lastForbiddenCategory} instead: ${pickSafeIdea(setKey, lastForbiddenCategory)}.`
+      );
+    }
+    if (!lastHadTextOrBorder && !lastForbiddenCategory) {
+      feedbackParts.push(`Generate a genuinely different image that avoids that problem entirely.`);
+    }
+    const retryFeedback = feedbackParts.join(' ');
 
     const promptText = attempt === 1
       ? basePromptText
@@ -891,6 +920,7 @@ SECOND FINAL RULE, ABSOLUTE, NO EXCEPTIONS: if any of today's three answers rese
 
     lastResult = result;
     const reasons = [];
+    lastHadTextOrBorder = Boolean(pixelCheck.hasBorder || visionCheck.hasTextOrBorder);
     if (pixelCheck.hasBorder) {
       reasons.push('direct pixel analysis of the image edges found a uniform flat-colored border/frame around it');
     }
