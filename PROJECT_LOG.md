@@ -6,6 +6,82 @@ Read this at the start of any SWG session, same as `CLAUDE.md`.
 
 ---
 
+## 2026-09-21 (4) — Real Vercel log lines found for Rick's two failed tarot pulls: image quality-check exhaustion, not the time-budget cutoff
+
+Picked up the handoff directly below. `vercel whoami` returned `rick21west-arch` — CLI was already authenticated on this machine, no login step needed, nothing for Rick to do here. (First call threw a noisy but harmless "Worker timed out... EPIPE" warning before printing the real answer; a second call ran clean — that warning is not an auth failure, don't mistake it for one next time.)
+
+**Real logs, pulled directly, not guessed.** Repo path confirmed first (`C:/Users/Rick/Desktop/EZ/websites/swg-site-v12/swg-site`, matches). Queried the current production deployment with `vercel logs <deployment-url> --since 6h --json`, matched against real `www.southernwritersguild.com` traffic. The 6-hour window returned exactly 8 log entries, all `/api/tarot` — nothing else failed tonight besides the two pulls Rick flagged. They resolve into two clean, back-to-back failure clusters, each spaced ~60s apart (matching the client's own silent-retry-once behavior shipped 2026-09-08 — each failure Rick actually saw represents two real failed attempts under the hood, not one):
+
+- **Pull #1:** `502` at 2026-09-21T14:31:58Z, `502` again at 14:32:58Z
+- **Pull #2:** `502` at 14:34:16Z, `502` again at 14:35:17Z
+
+All four carry the identical error, verbatim from the log:
+
+> `Tarot image engine error: Error: Generated image still failed the check after 6 attempts: the image contained visible text, numbers, or a border/frame, which is never allowed — those get added by the site afterward. Last attempt mime type: image/png`
+
+One of the four (14:31:58Z) also logged a sub-event first — `Gemini returned no image on first try, retrying once immediately` — for that pull's boat/"Hubert" answer; that particular hiccup recovered on its own inside the same attempt, before the outer 6-attempt budget still ran out anyway.
+
+**Real cause, not a guess:** this is the pixel-level border/text checker doing exactly its job — catching bad images — but the image generation itself kept producing non-compliant images (visible text, numbers, or a border/frame baked into the picture) on every single one of 6 attempts, twice in a row, for both of Rick's pulls. This is **not** the already-documented time-budget cutoff (`Ran out of safe time budget...` appears nowhere in these four lines) and not a raw Gemini transport failure — it's a distinct failure mode already possible in the existing architecture but not previously the one caught red-handed in a real log: the model failing the content-quality bar repeatedly, not running out of clock.
+
+For contrast, the one clean pull already logged in the entry below this (the 14:50:54Z live test) shows two clean `200`s at 14:50:48Z in the same log pull, no error text at all — real evidence the feature is healthy when Google's model happens to comply.
+
+**Not yet known, stated plainly rather than guessed at:** why the model produced text/border-violating images on 12 straight sub-attempts across two real pulls tonight specifically, instead of the more typical assorted-failure mix this architecture is known to produce. One plausible lead, not a conclusion: pull #1's drawn answer literally named a boat "Hubert" and asked for that name worked into the scene — a real word the model was asked to render onto a physical object, a plausible nudge toward painting legible text. Two pulls isn't enough data to call that confirmed.
+
+**What this does and doesn't close out:** this answers the one thing last entry couldn't get to — the real logged cause, not a "known small chance, got unlucky" placeholder. It does not change anything about the already-logged permanent fix (moving image generation off the live request into a background job) — if anything, a run of image-quality failures like this is exactly the kind of case that fix would ride out more gracefully, since a background job isn't burning a hard wall-clock budget the way this synchronous request is.
+
+---
+
+## 2026-09-21 (3) — HANDOFF to Claude Code: pull the real Vercel log lines for Rick's two failed tarot pulls tonight
+
+Picking up directly from the entry right below this one. Cowork's own investigation there ruled out a code change and a Google-wide outage, and confirmed the feature works right now via a real live test pull — but explicitly did NOT get the one thing that actually names a cause: the real error line Vercel logged for Rick's two specific failed `/api/tarot` requests tonight. Rick correctly called the "known small chance, got unlucky twice" read a lazy answer — it's the most defensible read from what was checkable tonight, not a real cause, and it stops here rather than being asserted as settled.
+
+That real line needs either a Vercel dashboard login (a hard no for Cowork to do on Rick's behalf) or the `vercel` CLI in a real terminal — Cowork's own device shell was down all session (same outage logged in the entry below this one), so this is a genuine tooling gap, not a shortcut.
+
+**Do this, don't re-derive a plan:**
+
+1. Confirm you're in the real repo first (the mandatory check, top of `CLAUDE.md`) — `git rev-parse --show-toplevel` must read exactly `C:/Users/Rick/Desktop/EZ/websites/swg-site-v12/swg-site`.
+2. Check whether the `vercel` CLI is already authenticated on this machine (`vercel whoami`). If yes, pull logs for the production deployment covering the last several hours before this session starts (`vercel logs <production-url-or-deployment-id> --since 6h`, widen if nothing shows) and grep for `Tarot text engine error` / `Tarot image engine error` — the exact `console.error` prefix `api/tarot.js` writes right before it returns the failure to the visitor (around line 966). If not authenticated, `vercel login` needs a real human to complete (a browser/email flow) — stop and ask Rick to run that one step himself rather than guessing around it; everything after login is yours to run, not his.
+3. **Retention is the real risk here, not the login.** Vercel's Hobby-tier runtime logs are not kept indefinitely — the longer this sits before running, the more likely the actual lines are already gone. If they're gone, say that plainly as a real, honest dead end rather than guessing at a cause from nothing.
+4. If the real lines turn up: report the actual error text back in this file, dated, same pattern as every other entry — was it the time-budget cutoff (`Ran out of safe time budget...`), a Gemini call failure, a vision/pixel check failure, or something not seen before. Whichever it is becomes the real next thing to fix or watch, not a guess.
+5. Either way, log plainly whether the CLI was even authenticated, so the next session doesn't waste time re-asking the same question.
+
+---
+
+## 2026-09-21 (2) — Rick's back-to-back tarot timeout, investigated live; no regression found, feature confirmed healthy on a real test pull
+
+Rick: two pulls in a row failed/timed out for him personally, asked directly to go find out why.
+
+**Checked, in order, per the staged-debugging rule:**
+1. **Did the code change recently?** No. `api/tarot.js` and `tarot/index.html` both last modified 2026-09-08 — untouched since the retry-loop fix and silent-retry client fix already logged that day. Confirmed by reading file modification times directly off Rick's machine, not assumed from git history.
+2. **Is this a known Google-side outage?** Checked Google Cloud's own status dashboard directly: no incidents listed affecting Gemini/Vertex AI as of this check. Doesn't rule out a project-specific quota/billing hiccup (that wouldn't show on a public status page), but rules out a broad outage.
+3. **Is it broken right now?** Ran one real, live test pull through the actual production page (same method as the 2026-09-09 entry below) — both engines returned clean on the *first* attempt, no retry needed: text and image both done in under 14 seconds combined. Confirmed for real, not just a 200 status: the page rendered a full card (name, reading, image) and `tarotStats.readingCount` incremented 24 → 25 at `2026-09-21T14:50:54Z`, matching the test exactly.
+
+**What this does and doesn't answer, stated plainly:** this confirms the feature is not currently broken, and nothing changed in the code to explain a new failure pattern. It does NOT identify the exact cause of Rick's specific two failures — that would need the real error line from Vercel's own logs for those two requests, which needs a Vercel dashboard login (not done on Rick's behalf, per the hard limit). Couldn't get there another way either — the device bridge's shell (`device_bash`) was down for this check too, same outage already logged in the entry above from earlier tonight.
+
+**Most defensible read, stated as a read, not a fact:** this matches the already-known, already-logged architecture, not a new problem. Real numbers already on record (2026-09-08 entry below): each single full attempt has a real (if small, ~5-7%) chance of running out of its safe time budget before Google's image model responds — the code is written to fail honestly when that happens (a real error message) rather than hang forever, and the page silently retries once before ever showing the visitor anything. Two failures back to back, on two separate pulls, is rare under that known rate but not impossible, especially since a slow reply from Google's own model varies run to run and isn't fully in this site's control. Nothing found tonight points to anything worse than that known, already-flagged risk — the same one the real fix (moving image generation off the live request entirely, into a background job the page polls instead of waits on) was already logged as the permanent answer for, not yet built, not being built tonight.
+
+---
+
+## 2026-09-21 — Writers page avatar sizing/crop: two real layout bugs found and fixed; device bridge unreliable all session; "computer out of the loop" status clarified
+
+Started as a simple size bump on the small real-writer avatar circles (`.writer-avatar`, next to each big character portrait). Went through several rounds — 56→64.4→77.28→80px — settled on **80px**, confirmed live.
+
+**Real bug #1, fixed (commit `182fb25`):** the avatar was positioned from `.char-col`'s own bottom edge, and that column stretches to match whichever sibling (photo or bio text) is taller — so a longer bio visibly pulled the avatar away from the photo it belongs to (worst on Rick's entry, his bio being the longest). Fixed by wrapping the photo and avatar together in one fixed-size `.char-photo-frame` (280px desktop / 220px mobile, never stretched) so they move as one rigid unit regardless of bio length.
+
+**Real bug #2, fixed (commit `982e4f3`):** the `182fb25` fix nested the avatar inside the new fixed-size frame, but its old positioning math (`calc(50% - 130px)`, tuned for a wider, no-longer-existent parent) now landed it well inside the big circle instead of beside it — Rick caught this directly from the live page. Rewrote the positioning to center the avatar exactly on the photo frame's square corner (offset by the avatar's own radius, 40px, on each axis) — the corner of a square isn't covered by its inscribed circle, so this holds at any frame size with no overlap, confirmed by geometry and by re-checking the live server response. Also switched the badge to the *outward* side of each photo (away from the text column) instead of inward — Polk and Bo (image-left) now sit lower-left, Grace (image-right) lower-right — which made the old `data-writer-slug="gray"` override and the separate mobile-only override both redundant; both removed.
+
+**Correction for the record:** an earlier fix wired `avatarPhotoHotspot` into the small avatar crop (mirroring what `characterPhoto` already had), and Claude initially credited that fix for Rick's photo looking right. Checked the actual Sanity record afterward — Rick's fix was a brand-new pre-cropped square (3000×3000 PNG) uploaded via Canva, a completely different asset from the original beach photo. The hotspot code is live but had nothing to do with that result. Don't re-assert cause without checking the data first.
+
+**Open, not fixed:** Grace/Gray's avatarPhoto is a landscape source (1349×915, no hotspot set) and center-crops to something visibly garbled, confirmed on mobile. Same underlying issue class as Rick's original photo — needs the same treatment (a Sanity hotspot, or a pre-cropped square swap via Canva like Rick's). Whichever Rick prefers.
+
+**Unresolved oddity, now recurred a third time:** an edit written to `writers/index.html` through the device bridge (`device_commit_files`), confirmed written, was later found reverted back to an *old* version on re-check — twice earlier in the session, then again after the `982e4f3` work, this time reverting all the way back to the pre-`182fb25` original (bottom:24px, the old calc, the gray override) with no git action in between. Every occurrence was caught by re-staging and re-reading the file immediately after every write, and fixed by simply re-applying the edit and re-verifying — never traced to a root cause. Leading guess remains OneDrive/Google Drive sync on the Desktop-based project path clobbering a fresh write with a stale cloud copy, still unconfirmed. **New data point tonight: this only ever hit writes made through the file-only device bridge — never anything server-side.** Treat every bridge write as unconfirmed until independently re-read, every time, no exceptions.
+
+**"Is my computer out of the loop yet?" — answered directly, since Rick raised it:** Two different things were being conflated.
+1. **The GitHub repo's own location** — moved from Rick's personal account to the Guild-owned GitHub Organization on 2026-09-04, confirmed then via `gh repo view`. This part is real, done, and unrelated to tonight's question.
+2. **Who actually runs `git commit`/`git push`** — CLAUDE.md documents that a Cowork session (like this one) is supposed to be able to run git directly on Rick's machine through its own device shell (`device_bash`), the same way a real commit landed via that path on 2026-09-07 with no GitHub Desktop clicking from Rick. **That shell has been down for this entire session** — every call returns "Workspace unavailable... isolated Linux environment failed to start," re-tested live just now to be sure, not assumed from earlier in the session. That's why tonight fell back to the older pattern (Claude edits via the file-only bridge, Rick commits and pushes himself via GitHub Desktop) — a live tool outage this session, not a regression in what was set up two weeks ago, and not something Rick can do anything about. Worth checking at the start of the next session before assuming either way.
+
+---
+
 ## 2026-09-10 (4) — Open: whether the Guild needs its own independent Google Account, and how mail routing works today
 
 Not acting tonight — Rick flagged this to go on the list, not to be built now.
