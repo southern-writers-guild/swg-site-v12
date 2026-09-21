@@ -19,11 +19,17 @@
       border-bottom: 1px solid var(--border);
     }
     .char-col { display: flex; align-items: center; justify-content: center; padding: 40px 20px; position: relative; }
-    .char-photo-wrap { width: 280px; height: 280px; border-radius: 50%; overflow: hidden; border: 2px solid var(--accent); box-shadow: 0 0 0 8px var(--bg), 0 0 0 9px var(--border); flex-shrink: 0; }
+    /* Photo + avatar live inside one fixed-size, unstretched frame, so they
+       move as a single rigid unit — immune to .char-col being stretched
+       taller by a longer bio in the sibling column. Previously the avatar
+       was positioned from .char-col's own (stretchable) edge and drifted
+       away from the photo whenever text length changed the column height. */
+    .char-photo-frame { position: relative; width: 280px; height: 280px; flex-shrink: 0; }
+    .char-photo-wrap { width: 100%; height: 100%; border-radius: 50%; overflow: hidden; border: 2px solid var(--accent); box-shadow: 0 0 0 8px var(--bg), 0 0 0 9px var(--border); display: block; }
     .char-photo-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
-    .image-left .char-photo-wrap { transform: translateX(-24px); }
+    .image-left .char-photo-frame { transform: translateX(-24px); }
     .image-right .char-col { order: 2; }
-    .image-right .char-photo-wrap { transform: translateX(24px); }
+    .image-right .char-photo-frame { transform: translateX(24px); }
     .image-right .writer-col { order: 1; }
     .writer-text { padding: 32px 36px; display: flex; flex-direction: column; justify-content: center; }
 
@@ -68,13 +74,17 @@
     .jp-eyebrow { font-size: 14px; letter-spacing: 0.2em; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; }
     .jp-name { font-family: var(--font-serif); font-size: 1.1rem; font-weight: 400; color: var(--text); margin-bottom: 8px; }
 
+    @media (min-width: 769px) {
+      .writer-section[data-writer-slug="gray"] .writer-avatar { left: auto; right: calc(50% - 130px); }
+    }
+
     @media (max-width: 768px) {
       .writers-header { padding: 36px 24px 28px; }
       .writer-section { grid-template-columns: 1fr; }
       .image-right .char-col { order: 1; }
       .image-right .writer-col { order: 2; }
-      .char-photo-wrap { width: 220px; height: 220px; }
-      .image-left .char-photo-wrap, .image-right .char-photo-wrap { transform: none; }
+      .char-photo-frame { width: 220px; height: 220px; }
+      .image-left .char-photo-frame, .image-right .char-photo-frame { transform: none; }
       .image-left .writer-avatar, .image-right .writer-avatar { left: calc(50% - 100px); right: auto; }
       .writer-text { padding: 24px; }
       .section-trio { grid-template-columns: 1fr; }
@@ -189,10 +199,12 @@
       const href = `/writers/${esc(w.slug)}/`
       const photo = `
         <div class="char-col">
-          <a href="${href}" class="char-photo-wrap" style="display:block;">
-            <img src="${esc(w.characterPhotoUrl || '')}" alt="${esc(w.characterName)}" data-sanity="${esc(sanityImageDataAttr(w, 'writer', 'characterPhoto'))}" style="object-position:${pos};">
-          </a>
-          <div class="writer-avatar"><img src="${esc(w.avatarPhotoUrl || '')}" alt="${esc(w.realName || '')}" data-sanity="${esc(sanityImageDataAttr(w, 'writer', 'avatarPhoto'))}" style="object-position:${avatarPos};"></div>
+          <div class="char-photo-frame">
+            <a href="${href}" class="char-photo-wrap" style="display:block;">
+              <img src="${esc(w.characterPhotoUrl || '')}" alt="${esc(w.characterName)}" data-sanity="${esc(sanityImageDataAttr(w, 'writer', 'characterPhoto'))}" style="object-position:${pos};">
+            </a>
+            <div class="writer-avatar"><img src="${esc(w.avatarPhotoUrl || '')}" alt="${esc(w.realName || '')}" data-sanity="${esc(sanityImageDataAttr(w, 'writer', 'avatarPhoto'))}" style="object-position:${avatarPos};"></div>
+          </div>
         </div>`
       const text = `
         <div class="writer-col">
@@ -207,7 +219,7 @@
             ${renderLinks(w.links)}
           </div>
         </div>`
-      return `<div class="writer-section ${alignLeft ? 'image-left' : 'image-right'}">${alignLeft ? photo + text : text + photo}</div>`
+      return `<div class="writer-section ${alignLeft ? 'image-left' : 'image-right'}" data-writer-slug="${esc(w.slug)}">${alignLeft ? photo + text : text + photo}</div>`
     }
 
     // Character-only treatment (no avatar photo) — Jean-Paul today, any
