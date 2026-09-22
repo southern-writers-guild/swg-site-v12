@@ -6,6 +6,22 @@ Read this at the start of any SWG session, same as `CLAUDE.md`.
 
 ---
 
+## 2026-09-22 — New goofy wait-screen copy shipped for the tarot page (committed and pushed to `main` by Claude Code, same day)
+
+Rick's direct request, a copy/content change, not a bug fix. Four things changed in `tarot/index.html`:
+
+1. New line under the hero subtitle: "He loves goofy answers." (italic, `text-faint`, sits right under "Answer three questions. Jean-Paul draws you a card.").
+2. The static loading line baked into the HTML (`#tarot-loading-text`) changed from the old dry "Jean-Paul is thinking it over..." to a plain "Jean-Paul is drawing your card." — this is what shows for the first 10 seconds, before the new rotation kicks in. Not specified by Rick; filled the gap with something neutral since most real reads (per the 2026-09-09 timing data further down this file — text ~4s, image ~13s) finish inside that window and never see the goofy lines at all.
+3. Replaced the old 4-message dry rotation (6s interval, immediate start) with a new goofy 4-slot sequence in Jean-Paul's voice: first slot fires at 10s, then every 10s after, each slot drawing randomly from its own pool (slot 1: 3 lines; slots 2 and 3 share one pool of 6 lines, each independently random; slot 4: 3 lines), looping back to slot 1 if a read runs past 40s. Full pool text is in the file itself, not duplicated here.
+4. **Interpretation call, flagged rather than silently made:** the old `RETRY_LOADING_TEXT` ("That one gave him some trouble...") — shown specifically when a silent client-side retry kicked in — was removed outright rather than replaced with an equivalent. Rick asked to "replace the current placeholders" with the new sequence, and the old retry-text was one of the placeholders listed when he asked what the current set was (entry not in this file, asked directly in chat). Reasoned that the new goofy rotation just keeps running through a silent retry with nothing to announce — fits the lighter tone better than interrupting the bit. If Rick actually wanted a distinct "retrying" beat kept, that's a one-line add back.
+5. The final visible failure message (shown only after both the original attempt and the one silent retry fail — real rate, per the 2026-09-21 entries above, is rare but not zero) changed from "Jean-Paul's having trouble seeing this one clearly, even on a second look. Try again?" to Rick's own wording: "The bird is high on his own supply. You are not charged for his shenanigans. But please try again — the bird doesn't fail often."
+
+Syntax-checked (extracted the inline module script, `node --check`, clean) before writing. Written to `tarot/index.html` on the real machine, confirmed by re-reading the file back and grepping for the new strings directly — all four present.
+
+**Done 2026-09-22:** Cowork's device shell was down, so this sat uncommitted until a Claude Code session committed and pushed `tarot/index.html` (and this log) to `main`.
+
+---
+
 ## 2026-09-21 (6) — Rick pulled both naming questions himself; new real-person-name face issue spotted, watching, not fixing yet
 
 **Rick's own call, done directly, not asked for:** removed both questions flagged in the entry below (boat-naming, Wilbur-pet-naming) from the live Sanity question bank. Confirmed for real, not taken on his word alone — queried the live question set directly, zero matches for either now. Simpler than the code-level retry fix in the entry below, and his to choose over it; both now stand together — the questions that triggered tonight's specific failure are gone, and the retry-feedback fix from the entry below still stands as a general safety net for any other answer that happens to be a name, on whatever question draws one out.
