@@ -841,6 +841,19 @@
          out.push(renderDividerBlock())
          return
        }
+       if (block._type === 'poetryBlock') {
+         // Deliberately not run through renderSpans/esc()'s HTML-escaping
+         // pipeline for marks -- there are no marks here, just literal
+         // text. esc() still runs, to keep user-entered text safe to
+         // inject as HTML; it never touches whitespace or newlines, which
+         // is exactly what white-space:pre-wrap (css/swg.css,
+         // .poetry-block) needs to render spacing and line breaks exactly
+         // as entered in Studio -- no <br> conversion needed here, unlike
+         // renderSpans() above.
+         flushList()
+         out.push(`<div class="poetry-block">${esc(block.text || '')}</div>`)
+         return
+       }
        if (block._type !== 'block') { flushList(); return }
 
        const isListItem = block.listItem === 'bullet' || block.listItem === 'number'

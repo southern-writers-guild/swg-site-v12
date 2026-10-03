@@ -518,6 +518,19 @@ ul, ol { list-style: none; }
 .prose p.space-open, .belief-body p.space-open,
 .writer-bio p.space-open, .writer-body p.space-open { margin-bottom: 2.25em; }
 
+/* Poetry / exact-formatting block (poetryBlock, js/sanity.js). Unlike a
+   .prose p, this isn't HTML-reflowed text -- it's a single pre-wrapped
+   text node, so every space, line break, and blank line entered in
+   Studio renders exactly as typed, with no editor/browser collapsing.
+   Keeps the same color/size as a normal paragraph so a poetry passage
+   reads as part of the same piece, not a visually separate component. */
+.prose .poetry-block {
+  white-space: pre-wrap;
+  color: var(--text-muted);
+  margin-bottom: 1.25rem;
+  font-family: var(--font-body);
+}
+
 .prose code {
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   font-size: 0.9em;
