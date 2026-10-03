@@ -121,6 +121,12 @@
         thumbEl.innerHTML = `<img src="${esc(thumb)}" alt="${esc(stegaClean(story.title))}" style="width:100%;height:auto;display:block;margin:var(--sp-md) 0;">`
       }
 
+      // Per-story spacing choice from Sanity (porchStory.layout); rules in
+      // css/swg.css under .story-layout. Unset = the site's standard .prose
+      // spacing, so existing stories don't change until a writer picks one.
+      const layout = stegaClean(story.layout)
+      if (layout === 'book' || layout === 'gaps') bodyEl.classList.add('story-layout', 'layout-' + layout)
+
       if (story.body && story.body.length) {
         bodyEl.innerHTML = renderPortableText(story.body)
       } else if (story.excerpt) {

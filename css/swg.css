@@ -504,6 +504,22 @@ ul, ol { list-style: none; }
 .prose p { margin-bottom: 1.25rem; color: var(--text-muted); }
 .prose p:first-child { color: var(--text); font-size: 1.15rem; }
 
+/* Porch story layouts -- each story picks one in Studio (porchStory.layout);
+   the-porch/story/index.html adds the class. Placed before the Tight/Open
+   rules below so Tight still applies in Clear gaps. In Book style the
+   higher-specificity rule zeroes Tight (no gap to tighten); Open still adds
+   a deliberate gap. A paragraph after a heading, image, divider or blank
+   line (p.empty, from renderPortableText) starts without an indent. */
+.story-layout.layout-gaps { line-height: 1.5; }
+.story-layout.layout-gaps p { margin-bottom: 0.6em; }
+.story-layout.layout-book { line-height: 1.65; }
+.story-layout.layout-book p { margin-bottom: 0; text-indent: 1.5em; }
+.story-layout.layout-book p.space-tight { margin-bottom: 0; }
+.story-layout.layout-book :not(p) + p,
+.story-layout.layout-book p:first-child,
+.story-layout.layout-book p.empty + p { text-indent: 0; }
+.story-layout.layout-book p.space-open { margin-bottom: 2.25em; }
+
 /* Spacing variants from the Studio's paragraph-style menu (see
    schemaTypes/rich-text-block.js in the Studio repo, and SPACING_CLASS
    in js/sanity.js, which puts these classes on the rendered <p>). Listed

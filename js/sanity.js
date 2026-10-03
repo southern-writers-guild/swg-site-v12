@@ -867,7 +867,9 @@
        flushList()
 
        const inner = renderSpans(block)
-       if (!inner.trim()) { out.push('<p>&nbsp;</p>'); return }
+       // class="empty" lets book-style layouts start the next paragraph
+       // without an indent, the way a printed book marks a pause.
+       if (!inner.trim()) { out.push('<p class="empty">&nbsp;</p>'); return }
 
        const style = block.style || 'normal'
        if (style === 'h2') out.push(`<h2>${inner}</h2>`)
