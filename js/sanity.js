@@ -786,7 +786,10 @@
      function renderSpans(block) {
        const markDefs = block.markDefs || []
        return (block.children || []).map(span => {
-         let text = esc(span.text || '')
+         // esc() first, then turn a literal line break inside the span
+         // into a real <br> -- previously a return typed mid-paragraph
+         // (not a new block) just vanished, since nothing converted it.
+         let text = esc(span.text || '').replace(/\n/g, '<br>')
          ;(span.marks || []).forEach(mark => {
            const def = markDefs.find(m => m._key === mark)
            if (def && def._type === 'link' && def.href) {
@@ -795,10 +798,26 @@
              text = `<strong>${text}</strong>`
            } else if (mark === 'em') {
              text = `<em>${text}</em>`
+           } else if (mark === 'underline') {
+             text = `<u>${text}</u>`
+           } else if (mark === 'strike-through') {
+             text = `<s>${text}</s>`
+           } else if (mark === 'code') {
+             text = `<code>${text}</code>`
            }
          })
          return text
        }).join('')
+     }
+
+     // Studio's paragraph-style dropdown now offers spacing variants
+     // alongside Normal -- this is where that choice turns into an
+     // actual CSS class, read by the shared .prose rules in swg.css.
+     // Keep this map in sync with schemaTypes/rich-text-block.js in
+     // the Studio repo, where the style values are defined.
+     const SPACING_CLASS = {
+       normalTight: ' class="space-tight"',
+       normalOpen: ' class="space-open"'
      }
 
      blocks.forEach(block => {
@@ -842,7 +861,7 @@
        else if (style === 'h3') out.push(`<h3>${inner}</h3>`)
        else if (style === 'h4') out.push(`<h4>${inner}</h4>`)
        else if (style === 'blockquote') out.push(`<blockquote>${inner}</blockquote>`)
-       else out.push(`<p>${inner}</p>`)
+       else out.push(`<p${SPACING_CLASS[style] || ''}>${inner}</p>`)
      })
 
      flushList()

@@ -504,6 +504,24 @@ ul, ol { list-style: none; }
 .prose p { margin-bottom: 1.25rem; color: var(--text-muted); }
 .prose p:first-child { color: var(--text); font-size: 1.15rem; }
 
+/* Spacing variants from the Studio's paragraph-style menu (see
+   schemaTypes/rich-text-block.js in the Studio repo, and SPACING_CLASS
+   in js/sanity.js, which puts these classes on the rendered <p>). Listed
+   for both .prose and the House belief cards' own smaller type scale,
+   so an editor's spacing choice holds regardless of which field it's
+   on -- previously each of those contexts had its own separate, flatly
+   fixed margin-bottom and no way to vary it at all. */
+.prose p.space-tight, .belief-body p.space-tight { margin-bottom: 0.4em; }
+.prose p.space-open, .belief-body p.space-open { margin-bottom: 2.25em; }
+
+.prose code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.9em;
+  background: var(--bg-3);
+  padding: 0.15em 0.4em;
+  border-radius: 3px;
+}
+
 .prose ul, .prose ol {
   margin: 1rem 0 1.25rem 1.5rem;
   color: var(--text-muted);
