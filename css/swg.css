@@ -507,12 +507,16 @@ ul, ol { list-style: none; }
 /* Spacing variants from the Studio's paragraph-style menu (see
    schemaTypes/rich-text-block.js in the Studio repo, and SPACING_CLASS
    in js/sanity.js, which puts these classes on the rendered <p>). Listed
-   for both .prose and the House belief cards' own smaller type scale,
-   so an editor's spacing choice holds regardless of which field it's
+   for .prose, the House belief cards, and the writer bios (.writer-bio
+   on the Writers listing, .writer-body on a single writer's page) --
+   each keeps its own smaller type scale and default paragraph gap, so
+   an editor's spacing choice holds regardless of which field it's
    on -- previously each of those contexts had its own separate, flatly
    fixed margin-bottom and no way to vary it at all. */
-.prose p.space-tight, .belief-body p.space-tight { margin-bottom: 0.4em; }
-.prose p.space-open, .belief-body p.space-open { margin-bottom: 2.25em; }
+.prose p.space-tight, .belief-body p.space-tight,
+.writer-bio p.space-tight, .writer-body p.space-tight { margin-bottom: 0.4em; }
+.prose p.space-open, .belief-body p.space-open,
+.writer-bio p.space-open, .writer-body p.space-open { margin-bottom: 2.25em; }
 
 .prose code {
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;

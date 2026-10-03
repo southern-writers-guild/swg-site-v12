@@ -137,7 +137,7 @@
   </footer>
 
   <script type="module">
-    import { fetchWriterBySlug, esc, stegaClean, sanityImageDataAttr, fetchWritersPageSettings } from '/js/sanity.js'
+    import { fetchWriterBySlug, esc, stegaClean, sanityImageDataAttr, fetchWritersPageSettings, renderPortableText } from '/js/sanity.js'
 
     const heroEl = document.getElementById('writer-hero-content')
     const bodyEl = document.getElementById('writer-body-content')
@@ -165,11 +165,6 @@
 
     function cleanAttributes(html) {
       return html.replace(/(src|href|alt)="([^"]*)"/g, (m, attr, value) => `${attr}="${stegaClean(value)}"`)
-    }
-
-    function renderParagraphs(text) {
-      if (!text) return ''
-      return text.split(/\n\s*\n/).map(p => `<p>${esc(p.trim())}</p>`).join('')
     }
 
     function renderLinks(links) {
@@ -205,11 +200,11 @@
       heroEl.innerHTML = isPreviewing() ? cleanAttributes(hero) : hero
 
       let body = ''
-      if (w.writerBio) {
-        body += `<h2>${isCharacterOnly ? 'Who He Is' : 'The Writer'}</h2>${renderParagraphs(w.writerBio)}`
+      if (w.writerBio?.length) {
+        body += `<h2>${isCharacterOnly ? 'Who He Is' : 'The Writer'}</h2>${renderPortableText(w.writerBio)}`
       }
-      if (w.characterBio) {
-        body += `<div style="height:2rem;"></div><h2>${isCharacterOnly ? 'More' : 'The Character'}</h2>${renderParagraphs(w.characterBio)}`
+      if (w.characterBio?.length) {
+        body += `<div style="height:2rem;"></div><h2>${isCharacterOnly ? 'More' : 'The Character'}</h2>${renderPortableText(w.characterBio)}`
       }
       bodyEl.innerHTML = body
 

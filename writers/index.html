@@ -132,7 +132,7 @@
   </footer>
 
   <script type="module">
-    import { fetchWriters, esc, stegaClean, sanityImageDataAttr, fetchWritersPageSettings } from '../js/sanity.js'
+    import { fetchWriters, esc, stegaClean, sanityImageDataAttr, fetchWritersPageSettings, renderPortableText } from '../js/sanity.js'
 
     const listEl = document.getElementById('writers-list')
 
@@ -177,14 +177,6 @@
       return 'center top'
     }
 
-    // Multi-paragraph bios were written as separate <p> tags on the old
-    // hardcoded pages — preserved here rather than collapsing to one
-    // block, since these bios read that way on purpose.
-    function renderParagraphs(text) {
-      if (!text) return ''
-      return text.split(/\n\s*\n/).map(p => `<p>${esc(p.trim())}</p>`).join('')
-    }
-
     function renderLinks(links) {
       if (!links || !links.length) return ''
       return links.map(l => `<a href="${esc(l.url)}" target="_blank" rel="noopener" class="writer-link">${esc(l.label)}</a>`).join('')
@@ -216,7 +208,7 @@
             <div class="identity-rule"></div>
             <p class="role-label">${esc(labels.cardLabelWriter)}</p>
             <h3 class="writer-name">${esc(w.realName || '')}</h3>
-            <div class="writer-bio">${renderParagraphs(w.writerBio)}</div>
+            <div class="writer-bio">${renderPortableText(w.writerBio)}</div>
             ${renderLinks(w.links)}
           </div>
         </div>`
@@ -233,7 +225,7 @@
             <p class="jp-eyebrow">${esc(labels.labelAlsoPresent)}</p>
             <h3 class="jp-name"><a href="${href}" style="color:inherit;text-decoration:none;">${esc(w.characterName)}</a></h3>
             <div class="identity-rule"></div>
-            <div class="writer-bio" style="max-width:520px;">${renderParagraphs(w.writerBio)}</div>
+            <div class="writer-bio" style="max-width:520px;">${renderPortableText(w.writerBio)}</div>
             ${renderLinks(w.links)}
             ${w.slug === 'jean-paul' ? `<a href="/tarot/" style="display:inline-block;margin-top:14px;padding:6px 14px;border:1px solid var(--text-faint);border-radius:4px;color:var(--text-muted);font-family:var(--font-ui);font-size:0.65rem;letter-spacing:0.1em;text-transform:uppercase;text-decoration:none;">I do tarot.</a>` : ''}
           </div>
