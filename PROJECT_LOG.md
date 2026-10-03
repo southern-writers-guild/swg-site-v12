@@ -6,6 +6,16 @@ Read this at the start of any SWG session, same as `CLAUDE.md`.
 
 ---
 
+## 2026-10-03 — Writer bios upgraded to rich text (done, live, pushed by Claude Code)
+
+`writerBio` and `characterBio` on all four writer documents changed from plain text to rich-text blocks using the shared `bioBlockType()` (Normal / Tight / Open spacing, plus bold, italic, underline, strike-through, code, links). Founders can now format bios in Studio the same way as stories.
+
+- Content migrated first: one paragraph per block, split on blank lines (same rule the old site code used). All 8 bios were read back and compared paragraph by paragraph, and all matched exactly. No drafts existed, so nothing had to be reconciled. Only difference: Hank's character bio had a stray trailing space, which was trimmed. Pre-migration backup (raw JSON of all four documents) is in that Claude Code session's scratchpad. It's not in either repo.
+- Studio: `schemaTypes/writer.js` commit `20bf362`, deployed to swg-studio.sanity.studio.
+- Site: commit `979c725`. Both writer pages now use the shared `renderPortableText()`. The bios keep their own size and default paragraph gap. The Tight/Open spacing rules in `css/swg.css` were extended to cover `.writer-bio` and `.writer-body`, the same way `.belief-body` already worked. Checked live: same font sizes and gaps as before, and Tight/Open take effect when applied.
+
+---
+
 ## 2026-09-22 — New goofy wait-screen copy shipped for the tarot page (committed and pushed to `main` by Claude Code, same day)
 
 Rick's direct request, a copy/content change, not a bug fix. Four things changed in `tarot/index.html`:
