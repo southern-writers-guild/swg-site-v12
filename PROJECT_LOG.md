@@ -6,7 +6,7 @@ Read this at the start of any SWG session, same as `CLAUDE.md`.
 
 ---
 
-## 2026-10-13 — SWG Circular gets a permanent homepage section; Right Now reworked (code written, NOT yet live — handed to Claude Code)
+## 2026-10-13 — SWG Circular gets a permanent homepage section; Right Now reworked (live — all four steps done by Claude Code the same day; see the update at the end of this entry)
 
 Rick's direct request after a partners' meeting. Scope checklist: `SCOPE_CIRCULAR_HOMEPAGE.md`, same folder.
 
@@ -46,6 +46,16 @@ Rick's direct request after a partners' meeting. Scope checklist: `SCOPE_CIRCULA
    - `/the-porch/` still lists the Circular.
 
 If step 3 lands before step 2, the Circular section shows "The next Circular is on its way." and the Circular stays in Right Now as it is today. Nothing breaks, but it looks wrong until step 2 is done.
+
+**Update, same day — all four steps done by Claude Code, in order:**
+1. Studio: commit `88da1e1` pushed. Schema deployed and Studio deployed to swg-studio.sanity.studio, both reported success.
+2. `isCircular` ticked on the published Circular. No draft and no release version existed, so there was nothing else to tick. Read back afterwards: `isCircular: true`, nothing else changed. Done through the Studio's own command-line tool. The Sanity connector in Claude sessions is signed in as Rick's personal account, which is cut off from the Guild organization on purpose (see CLAUDE.md, 2026-08-29), so it can't read or change Guild content.
+3. Site: commit `82a3ff6` pushed to `main`. The build ran clean first.
+4. Checked live:
+   - Homepage: the Circular section shows the one issue large, with nothing in the half-size spot. Passes.
+   - Right Now: Tailgate on the Porch, Life in the Fine Print, Buffalo Jump, three across. Passes.
+   - `/the-porch/circular/` lists the one Circular. Passes.
+   - `/the-porch/`: the main Porch page does **not** list the Circular, but this is not caused by this change. That page shows only stories with "Show in main Porch grid" ON, and the Circular already had that switch OFF, as do "Too Much Lemonade?" and "What's Really Real". The Circular still appears on "Every story from the Porch" (`/the-porch/archive/`). **Open, Rick's call:** turning that switch ON for the Circular would put it in the main Porch grid. Left untouched.
 
 ---
 
