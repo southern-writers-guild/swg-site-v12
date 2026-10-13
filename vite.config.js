@@ -26,6 +26,7 @@ const pages = [
   'the-house/guidelines/index.html',
   'the-porch/index.html',
   'the-porch/archive/index.html',
+  'the-porch/circular/index.html',
   'the-porch/story/index.html',
   'the-work/index.html',
   'the-work/books/index.html',

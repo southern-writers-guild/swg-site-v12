@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The SWG Circular — Archive — Southern Writers Guild</title>
+  <link rel="stylesheet" href="../../css/swg.css">
+</head>
+<body>
+
+  <nav class="site-nav">
+    <div class="nav-inner">
+      <a href="/" class="nav-logo-link">
+        <img src="../../assets/images/swg-logo.png" alt="Southern Writers Guild" class="nav-logo">
+      </a>
+      <button class="nav-toggle" aria-label="Open menu" aria-expanded="false"><span></span><span></span><span></span></button>
+      <ul class="nav-links">
+        <li><a href="/the-porch/" class="active">The Porch</a></li>
+        <li><a href="/the-work/">The Work</a></li>
+        <li><a href="/events/">Events</a></li>
+        <li><a href="/the-house/">The House</a></li>
+        <li><a href="/writers/">Writers</a></li>
+        
+        <li class="nav-join"><a href="/join/">Join</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <section class="hero" style="padding-bottom:var(--sp-md);">
+    <div class="container">
+      <span class="hero-eyebrow">The SWG Circular</span>
+      <h1 class="hero-headline" style="font-size:clamp(1.8rem,3.5vw,2.8rem);">Every issue of the Circular.</h1>
+      <p class="hero-sub">Most recent first. <a href="/" class="btn btn--ghost" style="font-size:0.62rem;margin-left:1rem;">&#8592; Back home</a></p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div id="circular-archive-grid" class="grid grid--3"></div>
+    </div>
+  </section>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <span class="footer-text">© 2026 Southern Writers Guild</span>
+      <img src="/assets/images/icon-peacock.png" alt="Jean-Paul, the Guild's peacock" class="footer-peacock">
+    </div>
+  </footer>
+
+  <script type="module">
+    // Every Porch Story ticked "This is an SWG Circular" in Studio, newest
+    // first — see fetchCirculars in js/sanity.js. Nothing to maintain by
+    // hand: a new issue appears here the moment it's published.
+    import { fetchCirculars, renderPorchCard, showLoading, showError } from '../../js/sanity.js'
+
+    const grid = document.getElementById('circular-archive-grid')
+    showLoading(grid)
+
+    fetchCirculars()
+      .then(issues => {
+        grid.innerHTML = issues && issues.length
+          ? issues.map(renderPorchCard).join('')
+          : '<div style="grid-column:1/-1;text-align:center;padding:3rem;color:var(--text-faint);font-family:var(--font-serif);font-style:italic;font-size:0.95rem;">The first Circular is on its way.</div>'
+      })
+      .catch(() => showError(grid, 'Unable to load the archive right now.'))
+  </script>
+
+  <script src="../../js/nav.js"></script>
+</body>
+</html>

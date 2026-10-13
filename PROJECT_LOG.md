@@ -6,6 +6,49 @@ Read this at the start of any SWG session, same as `CLAUDE.md`.
 
 ---
 
+## 2026-10-13 — SWG Circular gets a permanent homepage section; Right Now reworked (code written, NOT yet live — handed to Claude Code)
+
+Rick's direct request after a partners' meeting. Scope checklist: `SCOPE_CIRCULAR_HOMEPAGE.md`, same folder.
+
+**What was agreed with Rick:**
+- The Circular is made by the Guild itself and published in Sanity as an ordinary Porch Story. Kit is not involved.
+- A new "SWG Circular" section sits between the hero and Right Now. The newest issue is shown large, and the previous issue at half the width. Everything older lives on a new Circular Archive page at `/the-porch/circular/`. It all shifts by itself when a new issue is published.
+- Right Now shows three posts, three across. The newest posts with "Show on homepage" ON win, so if six are ON only the newest three show. If fewer than three are ON, the newest other posts fill the empty spots. Circulars never appear in Right Now.
+- Circulars keep appearing in the regular Porch lists (Rick's call).
+
+**Why the old Circular kept disappearing:** it was a Porch Story with "Show on homepage" ON in Right Now. Right Now only shows the three newest ON items, and the Circular's Published Date is 2026-08-10, so any newer story switched ON pushed it off. Four were ON as of 2026-10-13: Tailgate, Fine Print, the Circular, and Buffalo Jump (hidden).
+
+**How a Circular is marked:** a new Porch Story checkbox, `isCircular` ("This is an SWG Circular"). The site picks Circulars by that box and orders them by Published Date. So a new issue needs a newer Published Date than the last one.
+
+**Files changed:**
+- Studio repo (real path is `C:\Users\Rick\Desktop\EZ\SWG\southern-writers-guild`; the `EZ\southern-writers-guild` path in the 2026-09-01 entry below is outdated): `schemaTypes/porch-story.js` (new field, plus rewritten Show-on-homepage help text) and `schemaTypes/guild-video.js` (help text only).
+- Site repo:
+  - `js/sanity.js`: `fetchRightNow` replaces `fetchHomepageHighlights`, which only the homepage used. Adds `fetchCirculars` and `renderCircularCard`.
+  - `index.html`: the new section, and Right Now changed from `grid--2` to `grid--3`.
+  - `css/swg.css`: `.grid--circular` and `.circular-card*`. The lead issue shows cover-left, text-right above 900px wide and stacks below that.
+  - New page `the-porch/circular/index.html`.
+  - `vite.config.js`: the new page was added to the pages list.
+
+**Verified so far:**
+- A full build runs clean.
+- The new Right Now selection was run against live data and returns the expected three.
+- The layout was mocked onto the live homepage in a browser at desktop and phone widths, using the real Circular.
+- No new serverless function was added; the count is still 11 of 12.
+
+**Not yet done. Order matters, so please follow it:**
+1. Studio: commit both schema files, push, then run `npx sanity@latest schema deploy` and `npx sanity deploy`.
+2. Tick `isCircular = true` on the existing Circular, document `dbe3b05f-83ce-4cd4-aa04-baa6817951a6` ("The SWG Circular"). Do this on the published document, and on its draft too if one exists. Leave its `showOnHomepage` alone; it no longer matters.
+3. Site: commit and push to `main`.
+4. Verify live:
+   - Homepage: the Circular section shows one issue large, with nothing in the half-size spot until issue 2 exists.
+   - Right Now shows Tailgate on the Porch, Life in the Fine Print, and Buffalo Jump.
+   - `/the-porch/circular/` lists the one Circular.
+   - `/the-porch/` still lists the Circular.
+
+If step 3 lands before step 2, the Circular section shows "The next Circular is on its way." and the Circular stays in Right Now as it is today. Nothing breaks, but it looks wrong until step 2 is done.
+
+---
+
 ## 2026-10-03 — Writer bios upgraded to rich text (done, live, pushed by Claude Code)
 
 `writerBio` and `characterBio` on all four writer documents changed from plain text to rich-text blocks using the shared `bioBlockType()` (Normal / Tight / Open spacing, plus bold, italic, underline, strike-through, code, links). Founders can now format bios in Studio the same way as stories.

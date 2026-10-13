@@ -217,12 +217,24 @@
 
   <hr class="home-divider">
 
+  <section class="section" id="circular-section">
+    <div class="container">
+      <div class="section-header" style="margin-bottom:1.25rem;">
+        <span class="section-header-title">The SWG Circular</span>
+        <a href="/the-porch/circular/" class="section-see-all">Circular Archive &#8594;</a>
+      </div>
+      <div class="grid grid--circular" id="circular-grid"></div>
+    </div>
+  </section>
+
+  <hr class="home-divider">
+
   <section class="section">
     <div class="container">
       <div class="section-header" style="margin-bottom:1.25rem;">
         <span class="section-header-title">Right Now</span>
       </div>
-      <div class="grid grid--2" id="highlights-grid"></div>
+      <div class="grid grid--3" id="highlights-grid"></div>
     </div>
   </section>
 
@@ -282,11 +294,31 @@
   <script src="/js/nav.js"></script>
 
   <script type="module">
-    import { fetchHomepageHighlights, renderPorchCard, renderVideoCard, showLoading, showError, fetchHomeContent } from '/js/sanity.js'
+    import { fetchRightNow, fetchCirculars, renderCircularCard, renderPorchCard, renderVideoCard, showLoading, showError, fetchHomeContent } from '/js/sanity.js'
 
+    // The SWG Circular — newest issue large, the one before it half size.
+    // Both chosen automatically from Porch Stories ticked "This is an SWG
+    // Circular"; publishing a new issue shifts the older ones along, and
+    // everything older lives on /the-porch/circular/.
+    const circularGrid = document.getElementById('circular-grid')
+    showLoading(circularGrid)
+    fetchCirculars(2)
+      .then(issues => {
+        if (!issues || !issues.length) {
+          circularGrid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:2rem;color:var(--text-faint);font-family:var(--font-serif);font-style:italic;font-size:0.95rem;">The next Circular is on its way.</div>'
+          return
+        }
+        circularGrid.innerHTML =
+          renderCircularCard(issues[0], 'lead') +
+          (issues[1] ? renderCircularCard(issues[1], 'prev') : '')
+      })
+      .catch(() => showError(circularGrid, 'Unable to load the Circular right now.'))
+
+    // Right Now — always three posts, never a Circular. See fetchRightNow
+    // in js/sanity.js for how the three are picked.
     const highlightsGrid = document.getElementById('highlights-grid')
     showLoading(highlightsGrid)
-    fetchHomepageHighlights(3)
+    fetchRightNow(3)
       .then(items => {
         if (!items || !items.length) {
           highlightsGrid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:2rem;color:var(--text-faint);font-family:var(--font-serif);font-style:italic;font-size:0.95rem;">More to follow.</div>'

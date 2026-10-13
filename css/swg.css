@@ -389,6 +389,53 @@ ul, ol { list-style: none; }
 .grid--featured { grid-template-columns: 3fr 2fr; }
 .grid--writers { grid-template-columns: repeat(3, 1fr); }
 
+/* Homepage SWG Circular: newest issue at twice the width of the previous
+   one. With only one issue it keeps its two-thirds width rather than
+   stretching across the page. */
+.grid--circular { grid-template-columns: 2fr 1fr; align-items: start; }
+
+.circular-card { display: block; text-decoration: none; }
+.circular-card-image {
+  aspect-ratio: 16/9;
+  background: var(--bg-3);
+  margin-bottom: 0.9rem;
+  overflow: hidden;
+}
+.circular-card-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+.circular-card--lead { padding: 1.5rem; }
+/* Circular covers are usually tall, like a magazine cover, so on wider
+   screens the lead issue sits cover-left, text-right instead of a tall
+   cover floating in a wide frame. Stacks again on narrower screens. */
+@media (min-width: 901px) {
+  .circular-card--lead {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+    gap: 1.75rem;
+    align-items: center;
+  }
+  .circular-card--lead.circular-card--no-image { display: block; }
+  .circular-card--lead .circular-card-image {
+    aspect-ratio: 3/4;
+    margin-bottom: 0;
+  }
+}
+.circular-card-title { font-size: clamp(1.5rem, 2.4vw, 2rem); }
+.circular-card-cta {
+  display: inline-block;
+  margin-top: 0.9rem;
+  font-family: var(--font-ui);
+  font-size: 0.62rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+.circular-card:hover .circular-card-cta { color: var(--text); }
+
 .card {
   border: 0.5px solid var(--border);
   padding: 1.25rem;
@@ -766,7 +813,7 @@ ul, ol { list-style: none; }
   
   @media (max-width: 600px) {
     :root { --sp-md: 1.25rem; }
-    .grid--3, .grid--2, .grid--writers { grid-template-columns: 1fr; }
+    .grid--3, .grid--2, .grid--writers, .grid--circular { grid-template-columns: 1fr; }
     .nav-toggle { display: flex; }
     .nav-links { display: none; }
     .nav-links.open {

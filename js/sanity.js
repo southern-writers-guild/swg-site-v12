@@ -203,18 +203,75 @@
      return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })
    }
 
-   /* ── Homepage Highlights ───────────────────────────────────── */
-   /* Sanity-managed, toggle-controlled. Editors flip "Show on homepage"
-      on/off on any Porch Story or Guild Video in Studio — no code or
-      deploy needed to change what's featured. Stories and videos are
-      pulled together, newest first, so either kind can fill any of the
-      slots. Render with renderPorchCard or renderVideoCard depending
-      on each item's _type — see homepage script. */
+   /* ── Homepage: Right Now ────────────────────────────────────── */
+   /* Always three posts (Porch stories and Guild Videos together).
+      1. The newest items with "Show on homepage" ON come first — if
+         editors switch on six, only the newest three show.
+      2. If fewer than three are ON, the newest other posts fill the
+         empty spots, so the row is never short.
+      SWG Circulars are excluded entirely (even if switched ON) — they
+      have their own section above Right Now; see fetchCirculars.
+      Render each item with renderPorchCard or renderVideoCard by _type. */
 
-   export async function fetchHomepageHighlights(limit = 3) {
+   const RIGHT_NOW_POOL = `(_type == "porchStory" || _type == "guildVideo") && !(isCircular == true)`
+
+   export async function fetchRightNow(count = 3) {
+     const res = await sanityFetch(`{
+       "picked": *[${RIGHT_NOW_POOL} && showOnHomepage == true] | order(publishedAt desc) [0...${count}],
+       "latest": *[${RIGHT_NOW_POOL} && defined(publishedAt)] | order(publishedAt desc) [0...${count * 2}]
+     }`)
+     const items = [...((res && res.picked) || [])]
+     for (const item of (res && res.latest) || []) {
+       if (items.length >= count) break
+       if (!items.some(i => i._id === item._id)) items.push(item)
+     }
+     return items
+   }
+
+   /* ── The SWG Circular ──────────────────────────────────────── */
+   /* A Circular is an ordinary Porch Story with "This is an SWG
+      Circular" (isCircular) ticked in Studio. Newest first by Published
+      Date. The homepage takes the first two (newest large, previous one
+      half size); the Circular Archive page (/the-porch/circular/) lists
+      them all. Circulars still appear in the regular Porch lists too. */
+
+   export async function fetchCirculars(limit) {
+     const slice = limit ? ` [0...${Number(limit)}]` : ''
      return sanityFetch(
-       `*[(_type == "porchStory" || _type == "guildVideo") && showOnHomepage == true] | order(publishedAt desc) [0...${limit}]`
+       `*[_type == "porchStory" && isCircular == true] | order(publishedAt desc)${slice}`
      )
+   }
+
+   export function renderCircularCard(issue, size = 'lead') {
+     const lead = size === 'lead'
+     const thumb = thumbSrc(issue, lead ? 1200 : 700)
+     const pos = thumbPosition(issue)
+     const hasSlug = Boolean(issue.slug && issue.slug.current)
+     const href = hasSlug ? `/the-porch/${issue.slug.current}/` : issue.substackUrl
+     const external = hasSlug ? '' : 'target="_blank" rel="noopener"'
+     const img = thumb
+       ? `<div class="circular-card-image">
+            <img src="${esc(thumb)}" alt="${esc(issue.title)}" style="object-position:${pos};">
+          </div>`
+       : ''
+     const excerpt = issue.excerpt
+       ? (lead || issue.excerpt.length <= 140
+           ? issue.excerpt
+           : issue.excerpt.slice(0, 140).replace(/\s+\S*$/, '') + '…')
+       : ''
+     const label = lead
+       ? `Latest issue &nbsp;·&nbsp; ${esc(formatDate(issue.publishedAt))}`
+       : `Previous issue &nbsp;·&nbsp; ${esc(formatDate(issue.publishedAt))}`
+     return `
+       <a href="${esc(href || '#')}" ${external} class="card circular-card ${lead ? 'card--highlight circular-card--lead' : 'card--dim circular-card--prev'}${thumb ? '' : ' circular-card--no-image'}">
+         ${img}
+         <div class="circular-card-text">
+           <span class="card-label">${label}</span>
+           <h2 class="card-title${lead ? ' circular-card-title' : ' card-title--sm'}">${esc(issue.title)}</h2>
+           ${excerpt ? `<p class="card-body"${lead ? '' : ' style="font-size:0.88rem;"'}>${esc(excerpt)}</p>` : ''}
+           <span class="circular-card-cta">${lead ? 'Read the Circular' : 'Read'} &#8594;</span>
+         </div>
+       </a>`
    }
 
    /* ── Site Settings ─────────────────────────────────────────── */
