@@ -19,6 +19,7 @@ const pages = [
   'circular/index.html',
   'circular/issue/index.html',
   'circular/piece/index.html',
+  'circular-email/index.html',
   'events/index.html',
   'events/archive/index.html',
   'events/event/index.html',

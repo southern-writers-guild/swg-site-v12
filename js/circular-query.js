@@ -14,7 +14,7 @@
 // pulled in so the page needs no second round of fetching.
 export const CIRCULAR_ISSUE_PROJECTION = `{
   _id, _type, issueNumber, issueLabel, seasonName, tagline, issueDate,
-  presenterLine, publicationTitle,
+  presenterLine, publicationTitle, emailSubject, emailPreview, sendToKit,
   "coverUrl": coalesce(
     coverImage.asset->url,
     blocks[_type == "circularFeature"][0].image.asset->url,

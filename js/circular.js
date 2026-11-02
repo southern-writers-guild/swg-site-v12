@@ -16,9 +16,9 @@
 import { stegaClean } from '@sanity/client/stega'
 import { sanityFetch, renderPortableText, renderInline, plainTextOf, esc } from './sanity.js'
 import { CIRCULAR_ISSUE_BY_ADDRESS } from './circular-query.js'
+import { pad, slugify, issuePieces as piecesOf, PAGE_PATHS } from './circular-shared.js'
 
 const clean = v => (typeof v === 'string' ? stegaClean(v) : v)
-const pad = n => String(n).padStart(2, '0')
 
 // Editor values: one-line boxes render inline, writing boxes as
 // paragraphs; older documents may still hold plain strings.
@@ -69,40 +69,10 @@ function issueLabelHtml(issue) {
   return has(issue.issueLabel) ? inline(issue.issueLabel) : `Issue No. ${pad(clean(issue.issueNumber))}`
 }
 
-function slugify(text) {
-  return String(text || '')
-    .normalize('NFKD').replace(/[̀-ͯ]/g, '')
-    .toLowerCase()
-    .replace(/[‘’']/g, '')
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '') || 'piece'
-}
-
-// Every written Full piece in the issue, in page order, each with its web
-// address. Addresses come from titles; a repeated title in the same issue
-// gets -2, -3 (the Studio form promises this).
+// Every written Full piece in the issue, with its address (shared with
+// the email, js/circular-shared.js).
 export function issuePieces(issue) {
-  const used = {}
-  const out = []
-  ;(issue.blocks || []).forEach(block => {
-    ;(block.entries || []).forEach(entry => {
-      const p = entry.piece
-      if (!p || !Array.isArray(p.body) || !p.body.length) return
-      let slug = slugify(plain(p.title))
-      used[slug] = (used[slug] || 0) + 1
-      if (used[slug] > 1) slug = `${slug}-${used[slug]}`
-      out.push({ slug, entry, piece: p, block })
-    })
-  })
-  return out
-}
-
-const PAGE_PATHS = {
-  porchStory: s => `/the-porch/${s}/`,
-  writer: s => `/writers/${s}/`,
-  guildVideo: s => `/the-work/videos/${s}/`,
-  event: s => `/events/${s}/`,
-  featuredFiction: s => `/the-work/featured/${s}/`
+  return piecesOf(issue, plain)
 }
 
 function linkTarget(link) {

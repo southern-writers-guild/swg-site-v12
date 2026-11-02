@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex">
+  <title>Email preview — The SWG Circular</title>
+  <link rel="stylesheet" href="/css/swg.css">
+  <style>
+    .email-preview-bar { max-width: 640px; margin: 0 auto; padding: var(--sp-md) var(--sp-sm) var(--sp-sm); font-family: var(--font-ui); color: var(--text-muted); font-size: 0.85rem; line-height: 1.6; }
+    .email-preview-bar strong { color: var(--text); font-weight: 600; }
+    .email-preview-frame { display: block; width: 100%; max-width: 680px; margin: 0 auto var(--sp-lg); border: 0; background: #f3ead8; }
+  </style>
+</head>
+<body>
+  <div class="email-preview-bar" id="email-meta">Loading the email preview…</div>
+  <iframe class="email-preview-frame" id="email-frame" title="Email preview"></iframe>
+
+  <script type="module">
+    // /circular-email/<issue>/ — the light-paper email exactly as the
+    // website would hand it to Kit (js/circular-email.js). Not linked
+    // from anywhere public. Inside a Visual Editor session it shows the
+    // unpublished draft.
+    import { fetchIssue } from '/js/circular.js'
+    import { buildCircularEmail } from '/js/circular-email.js'
+    import { stegaClean } from '@sanity/client/stega'
+
+    const meta = document.getElementById('email-meta')
+    const frame = document.getElementById('email-frame')
+    const address = window.location.pathname.split('/').filter(Boolean)[1] || ''
+    const esc = s => String(s || '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]))
+
+    fetchIssue(address).then(raw => {
+      if (!raw) { meta.textContent = 'No issue at that address.'; return }
+      const issue = stegaClean(raw)
+      const email = buildCircularEmail(issue)
+      meta.innerHTML = `<strong>Subject:</strong> ${esc(email.subject)}<br><strong>Preview line:</strong> ${esc(email.previewText)}<br><strong>Send to Kit:</strong> ${issue.sendToKit ? 'on' : 'off'}`
+      frame.srcdoc = `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body style="margin:0;background:#f3ead8;">${email.html}</body></html>`
+      frame.onload = () => { frame.style.height = frame.contentDocument.documentElement.scrollHeight + 'px' }
+    }).catch(() => { meta.textContent = 'Something went wrong building the preview.' })
+  </script>
+</body>
+</html>

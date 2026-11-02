@@ -6,6 +6,59 @@ Read this at the start of any SWG session, same as `CLAUDE.md`.
 
 ---
 
+## 2026-11-02 (7) — SWG Circular stage 5: the Kit hand-off and the light-paper email (written, NOT yet live — handed to Claude Code)
+
+Entry (6) is done: site `0a2cc4b`, Studio `ae3e1ff`. Both issues hold editor values, and Rick published Issue 2 (`circular-issue-02`), now live at `/circular/02/`.
+
+**How it works (Rick approved the process, 2026-11-02):**
+1. Turn on **Send to Kit** in the issue's **Email (Kit)** section and publish.
+2. A Sanity webhook calls `/api/circular-to-kit`, and the website puts the light-paper email into Kit as an **unsent draft**.
+3. Grace tests, picks recipients and sends from Kit.
+4. Publishing again refreshes the draft until Kit has sent it. Nothing is ever sent from the website.
+
+**Site repo:**
+- `js/circular-shared.js` (new): piece addresses and link destinations, shared by the web page and the email. `js/circular.js` now imports from it.
+- `js/circular-email.js` (new): `buildCircularEmail(issue)` turns an issue into `{ subject, previewText, html }`.
+  - Email-safe: tables, inline styles, Georgia, 600px narrowing on phones.
+  - Light paper: background `#f3ead8`, card `#fbf6ec`, ink `#3b2f25`, rust accent `#a5482c`.
+  - Every link is absolute to the website.
+  - Tall pictures (detected from the `-WxH` in the Sanity image address) are shown 240px wide and centred.
+  - Kit's own default template adds the required footer.
+- `js/circular-query.js`: the projection now also returns `emailSubject`, `emailPreview` and `sendToKit`.
+- `api/circular-to-kit.js` (new function, count 10 of 12):
+  - **POST:** trusts only the `_id` from the request and re-reads the published issue itself. It acts only when Send to Kit is on and the issue isn't a legacy one-page issue.
+  - It finds its own earlier draft through a marker in Kit's internal description (`[swg-circular:<id>]`):
+    - no draft yet: creates an unsent draft (`public:false`, `send_at:null`);
+    - a draft exists: first reads it back, then rewrites only the subject, preview line and content, keeping Grace's recipients, schedule, template and sender exactly as she set them in Kit;
+    - the draft is sending or sent: skips.
+  - **No webhook secret is needed:** a forged call can at most refresh an unsent draft with the real published issue. If `SANITY_WEBHOOK_SECRET` is ever set, `?key=` becomes required.
+  - **GET `?check`** reports `kitKey: works | rejected (status) | missing` without showing the key. This replaces the stage 1 key check that the download block stopped.
+- `circular-email/index.html` (new): `/circular-email/<n>/` previews the email exactly as Kit will get it, with subject, preview line and switch state shown above. It isn't linked anywhere and is marked noindex. Inside a Visual Editor session it shows the draft.
+- `vercel.json` gets the `/circular-email/:issue` rewrites, placed first; `vite.config.js` gets the new page.
+
+**Studio repo:** `schemaTypes/circular-issue.js` gains an **Email (Kit)** section with:
+- **Email subject** (plain on purpose, since email programs can't show formatting there; blank uses title · issue · season);
+- **Email preview line** (blank uses the tagline);
+- **Send to Kit** (off by default).
+
+**Checked:**
+- `schema validate` gave 0 errors and 0 warnings.
+- `node --check` passes on every new file.
+- Issue 2's email was built from its real content: subject "The SWG Circular · Issue No. 02 · Haints' Cross 2026", preview "Stories worth passing around.", every link correct.
+- Screenshotted at 800px and 375px. Tall-picture detection was tested on Issue 2's real picture addresses.
+
+**Not yet done. Follow this order:**
+1. **Studio:** commit `schemaTypes/circular-issue.js`, push, then run `npx sanity@latest schema deploy` and `npx sanity deploy`.
+2. **Site:** `npm run build`, confirm `api/` holds 10 function files, commit everything from this entry, and push to `main`.
+3. **Verify live:**
+   - `https://www.southernwritersguild.com/api/circular-to-kit?check`: report the `kitKey` value. **If it isn't `works`, stop here and report.** Someone with the Kit login will make a new key; Claude (Cowork) gives Rick the steps.
+   - `/circular-email/02/` shows the subject, the preview line and the light-paper email.
+   - `/circular/02/` and its five piece pages are unchanged.
+4. **The Sanity webhook:** copy `Claude outputs/circular-stage5` into the Studio root and run `npx sanity exec circular-stage5/create-kit-webhook.mjs --with-user-token`. Report its full output. Move the folder back and commit nothing from it.
+5. **Do not switch on Send to Kit.** Rick or Grace does that, which is the real test.
+
+---
+
 ## 2026-11-02 (6) — Every Circular typing box gets an editing toolbar (written, NOT yet live — handed to Claude Code)
 
 Stage 3 went live at `0357beb` (Studio `a95a05e`). Issue 1's archive entry `circular-issue-01` is published; Issue 2 is still the draft `drafts.circular-issue-02`.

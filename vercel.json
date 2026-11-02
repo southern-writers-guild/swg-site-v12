@@ -3,6 +3,14 @@
   "outputDirectory": "dist",
   "rewrites": [
     {
+      "source": "/circular-email/:issue",
+      "destination": "/circular-email/index.html"
+    },
+    {
+      "source": "/circular-email/:issue/",
+      "destination": "/circular-email/index.html"
+    },
+    {
       "source": "/the-porch/:slug",
       "destination": "/the-porch/story/index.html"
     },
