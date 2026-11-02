@@ -905,9 +905,9 @@ ul, ol { list-style: none; }
 }
 .circ-subheading {
   text-align: center;
-  font-family: var(--font-ui);
-  font-size: 0.78rem;
-  letter-spacing: 0.12em;
+  font-family: var(--font-serif);
+  font-size: 14pt;
+  line-height: 1.4;
   color: var(--text-muted);
   margin-bottom: var(--sp-md);
 }

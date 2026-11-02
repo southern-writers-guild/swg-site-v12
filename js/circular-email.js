@@ -156,6 +156,11 @@ function heading(html) {
   return `<h2 style="margin:0 0 6px;font-family:${C.serif};font-size:28px;font-weight:normal;color:${C.ink};text-align:center;">${html}</h2>`
 }
 
+// "Line under the heading": 14pt in the serif (Rick, 2026-11-02).
+function subheading(v, gap) {
+  return `<p style="margin:0 0 ${gap}px;font-family:${C.serif};font-size:14pt;line-height:1.4;color:${C.muted};text-align:center;">${inline(v)}</p>`
+}
+
 function button(href, label) {
   return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:6px 0 0;"><tr><td bgcolor="${C.accent}" style="background:${C.accent};border-radius:2px;">
     <a href="${esc(abs(href))}" style="display:inline-block;padding:11px 22px;font-family:${C.sans};font-size:12px;letter-spacing:2px;text-transform:uppercase;color:#ffffff;text-decoration:none;">${label}</a>
@@ -232,7 +237,7 @@ function teasers(block, issue, pieces) {
   }).join('')
   return row(`
     ${has(block.heading) ? heading(inline(block.heading)) : ''}
-    ${has(block.subheading) ? `<p style="margin:0 0 18px;font-family:${C.sans};font-size:12px;letter-spacing:1px;color:${C.muted};text-align:center;">${inline(block.subheading)}</p>` : '<div style="height:14px;line-height:14px;font-size:0;">&nbsp;</div>'}
+    ${has(block.subheading) ? subheading(block.subheading, 18) : '<div style="height:14px;line-height:14px;font-size:0;">&nbsp;</div>'}
     ${entries}
   `)
 }
@@ -251,7 +256,7 @@ function linkList(block) {
   }).join('')
   return row(`
     ${has(block.heading) ? heading(inline(block.heading)) : ''}
-    ${has(block.subheading) ? `<p style="margin:0 0 14px;font-family:${C.sans};font-size:12px;letter-spacing:1px;color:${C.muted};text-align:center;">${inline(block.subheading)}</p>` : '<div style="height:12px;line-height:12px;font-size:0;">&nbsp;</div>'}
+    ${has(block.subheading) ? subheading(block.subheading, 14) : '<div style="height:12px;line-height:12px;font-size:0;">&nbsp;</div>'}
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">${items}</table>
   `)
 }
