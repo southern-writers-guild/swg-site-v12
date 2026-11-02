@@ -6,6 +6,41 @@ Read this at the start of any SWG session, same as `CLAUDE.md`.
 
 ---
 
+## 2026-11-02 (2) — SWG Circular rebuild, stage 2: Sanity forms (written, NOT yet deployed — handed to Claude Code)
+
+Stage 1 is live. It went out as Studio commit `5349bf5` and site commit `e217ddd`. Claude confirmed the home page directly: the three headings read as before, the Circular section shows Issue 1, and Right Now shows Tailgate, Fine Print and Buffalo Jump. The api/ folder has 9 function files. Kit key check deferred to stage 5.
+
+**Stage 2, written in the Studio repo only. Nothing on the public site changes.**
+- `schemaTypes/circular-issue.js` (`circularIssue`, "SWG Circular — Issue") has three tabs:
+  - **Masthead:** line above the title, title, issue number (must be unique), optional issue wording, season name, tagline, issue date (sets the order), optional cover picture.
+  - **Blocks:** a list taking any block type in any order.
+  - **Settings:** the web address (built from the number, e.g. `02`), and `legacyPage`, a link to an older one-page issue. Only Issue 1 uses it; with it set, blocks aren't required.
+- `schemaTypes/circular-blocks.js` is the kit, five block types. Every heading and label is per issue, and the values shown are only defaults.
+  - Feature: a Porch story (required); the teaser defaults to its opening paragraphs, three unless changed; optional picture override; button wording.
+  - Teasers: heading, optional line under it, a look (round portraits or pictures), and entries. Each entry has a name or title, an optional second line, an optional writer for the portrait, an optional picture, a short line, a link and link wording.
+  - Link list: heading, optional line under it, and links. Each link has optional wording and an optional picture; blank uses the page's own.
+  - Note: optional heading plus rich text.
+  - Sign-off: closing line, show writers (yes or no), wording over the writers, which writers (blank means all, in Writers order), and wording for the site link.
+- `schemaTypes/circular-link.js` (`circularLink`): every link chooses a Circular piece (pick one, or create one in place), a page on the site (Porch story, writer, video, event, book), or an outside address.
+- `schemaTypes/circular-piece.js` (`circularPiece`, "SWG Circular — Piece"): title, optional small label, byline, optional writer portrait, web address, optional top picture with caption, the same text editor as Porch stories, the same Layout choice, and an optional outside button (e.g. Listen on Spotify).
+- `schemaTypes/story-body.js`: the Porch story's body tools and Layout field moved into a shared file, so Porch stories and Circular pieces always offer the same tools. `porch-story.js` now imports them. The resulting form is identical apart from one wording change in the Layout help text ("the story text" became "the text").
+- Registered in `schemaTypes/index.js`.
+
+**Checked from here:**
+- `npx sanity schema validate` gave 0 errors and 0 warnings.
+- `npx sanity build` built cleanly, run on a scratch copy with auto-updates off because the scratch machine couldn't reach Sanity's update server. That's not a problem for real deploys.
+- Presentation tool routes for the new types are deliberately not added yet. The pages don't exist until stage 3.
+
+**Known Studio behaviour, to address in stage 3:** a piece is its own document, so Sanity requires each piece to be published before the issue that links to it can publish. Readers still can't reach a piece until its issue is published. Stage 3 adds a single "Publish issue and its pieces" button so partners don't have to do this one piece at a time.
+
+**Not yet done:**
+1. Studio repo: commit the five new files plus the `index.js` and `porch-story.js` changes, push, then run `npx sanity@latest schema deploy` and `npx sanity deploy`.
+2. Check in the deployed Studio that two new types appear: "SWG Circular — Issue" and "SWG Circular — Piece".
+3. Check that an existing Porch story still opens normally with its Story Text and Layout intact.
+4. Create nothing in the new types: Rick and Grace's click-through comes first.
+
+---
+
 ## 2026-11-02 — SWG Circular rebuild, stage 1 (written here, NOT yet live — handed to Claude Code)
 
 The full plan for rebuilding the Circular as its own publication is a shared doc: "The SWG Circular — Build Plan" (https://claude.ai/artifact/WLqU7J3DyJVnpBrWapQBtd). Read it before any Circular work. Here is the short version.
