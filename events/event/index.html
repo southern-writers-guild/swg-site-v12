@@ -90,7 +90,7 @@
     // swg_preview_active is a non-secret hint cookie set by /api/preview —
     // its only job is telling the page whether to attempt the draft route.
     // The real credential is a separate HttpOnly cookie this script can't
-    // read; /api/preview-event checks that one server-side. A visitor with
+    // read; /api/preview-doc checks that one server-side. A visitor with
     // no cookies at all never calls the preview route, so this is additive
     // to the existing published-only fetch, not a change to it. Same
     // mechanism as the Porch story page.
@@ -100,7 +100,7 @@
 
     function fetchEvent(slug) {
       if (!isPreviewing()) return fetchEventBySlug(slug)
-      return fetch(`/api/preview-event?slug=${encodeURIComponent(slug)}`)
+      return fetch(`/api/preview-doc?type=event&slug=${encodeURIComponent(slug)}`)
         .then(res => {
           if (!res.ok) throw new Error('Preview fetch failed')
           return res.json()

@@ -170,8 +170,8 @@ async function resolvePresentationToolRedirect(req) {
   // No document selected yet (Presentation Tool's initial load) resolves
   // to "/" — accepted as a harmless redirect target so the tool doesn't
   // retry forever waiting for a Porch-shaped path that isn't coming yet.
-  // Draft content itself stays Porch-only regardless: /api/preview-story
-  // never looks at this path, only at porchStory documents.
+  // Draft content itself is fetched separately by each page (through
+  // api/preview-doc.js and the other preview endpoints), never from this path.
   const cleanPath = redirectTo
     ? withoutSecretSearchParams(new URL(redirectTo, requestUrl)).pathname
     : '/';
@@ -203,7 +203,7 @@ export default async function handler(req, res) {
 
   // Either path lands here having proven itself independently; from this
   // point on the cookie set is identical regardless of which one fired,
-  // so everything downstream (api/preview-story.js, the story page's own
+  // so everything downstream (api/preview-doc.js, the story page's own
   // cookie check) is completely unaware anything changed upstream.
   setPreviewCookies(req, res, secret);
   res.setHeader('Location', redirectPath);

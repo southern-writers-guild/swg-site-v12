@@ -3,7 +3,7 @@ import { isValidPreviewRequest } from './_lib/preview.js';
 
 // Listing-page preview endpoint — every writer, in display order. Exact
 // mirror of api/preview-featured.js's "all" query, kept separate from
-// api/preview-writer.js (the individual-page endpoint).
+// api/preview-doc.js (the individual-page endpoint).
 const PROJECT_ID = 'fe6l0kiy';
 const DATASET = 'production';
 const API_VERSION = '2024-01-01';

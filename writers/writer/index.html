@@ -154,7 +154,7 @@
 
     function fetchWriter(slug) {
       if (!isPreviewing()) return fetchWriterBySlug(slug)
-      return fetch(`/api/preview-writer?slug=${encodeURIComponent(slug)}`)
+      return fetch(`/api/preview-doc?type=writer&slug=${encodeURIComponent(slug)}`)
         .then(res => {
           if (!res.ok) throw new Error('Preview fetch failed')
           return res.json()

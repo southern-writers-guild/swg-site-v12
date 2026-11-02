@@ -6,6 +6,55 @@ Read this at the start of any SWG session, same as `CLAUDE.md`.
 
 ---
 
+## 2026-11-02 — SWG Circular rebuild, stage 1 (written here, NOT yet live — handed to Claude Code)
+
+The full plan for rebuilding the Circular as its own publication is a shared doc: "The SWG Circular — Build Plan" (https://claude.ai/artifact/WLqU7J3DyJVnpBrWapQBtd). Read it before any Circular work. Here is the short version.
+
+- The Circular moves off the Porch entirely.
+- Each issue is put together in Sanity from a fixed kit of block types (Masthead, Feature, Teasers, Link list, Note, Sign-off). Partners arrange the blocks freely; only the masthead is fixed, at the top.
+- The pieces behind the front-page links exist only inside their issue, and the archive lists issues.
+- Each issue is built once on the site and sent into Kit as an unsent draft.
+- The website stays on brand. The email uses a light-paper look, which Rick approved on 2026-11-02.
+- Issue 1 archives as it is. The new method starts with Issue 2, whose final content is ready.
+
+**Standing rules Rick set (2026-11-02):**
+- Hard-code as little as possible. Everything the public sees should be settable in Sanity, with sensible defaults.
+- Previews never hold up new work.
+
+Rick deleted the trial "SWG Circular Issue 2" Porch story himself on 2026-11-02. Claude confirmed it is gone from Sanity and that Issue 1 shows as the large Circular on the home page again.
+
+**Correction:** the function count was 12 of 12, not 11 of 12. `api/tarot.js` made it twelve in September, and the 2026-10-13 entry repeated the stale figure without counting. CLAUDE.md is corrected.
+
+**Stage 1, written in both repos:**
+- **Site repo:**
+  - New `api/preview-doc.js`, called as `?type=porchStory|event|guildVideo|writer&slug=`. It replaces `preview-story.js`, `preview-event.js`, `preview-video.js` and `preview-writer.js`.
+  - The four pages that called those now call it: `the-porch/story`, `events/event`, `the-work/videos/video` and `writers/writer`.
+  - Comments that named the old files were updated.
+  - The four old files still need deleting (step 3 below). The Cowork device bridge can't delete files.
+  - Once they're gone, the count is 9 of 12. A full build ran clean on a scratch copy with the four files removed.
+- **Homepage wording:** the "The SWG Circular" heading, the archive link wording and the "Right Now" heading are now set from Sanity. The new `homeContent` fields are `circularHeading`, `circularArchiveLabel` and `rightNowHeading`. Left blank, each shows its current built-in wording.
+- **Studio repo** (`schemaTypes/home-content.js`): the three new optional fields.
+
+**Not yet done. Follow this order:**
+1. Studio repo: commit `schemaTypes/home-content.js`, push, then run `npx sanity@latest schema deploy` and `npx sanity deploy`.
+2. Test that the production `KIT_API_KEY` is current, without printing it anywhere:
+   - Pull production env vars to a temporary file outside both repos.
+   - Make one `GET https://api.kit.com/v4/account` call with header `X-Kit-Api-Key`, and report only the HTTP status (200 = good, 401 = stale).
+   - Delete the temporary file.
+   - Change nothing in Kit or Vercel.
+   - **Deferred to stage 5 (2026-11-02):** the Claude Code session's safety check blocked downloading the production settings, so the key check will run from the website's hosting itself in stage 5. Nothing was read or changed in Kit or Vercel.
+3. Site repo: delete `api/preview-story.js`, `api/preview-event.js`, `api/preview-video.js` and `api/preview-writer.js`. Then commit everything from this entry, plus the CLAUDE.md correction, and push to `main`.
+4. Verify live:
+   - The home page looks unchanged.
+   - `/api/preview-doc?type=porchStory&slug=judaculla-rock` returns 404 to a normal request. That's correct: it only answers inside a preview session.
+   - Each old endpoint now returns 404 as well, because it no longer exists.
+   - The `api/` folder holds 9 function files.
+   - Report the Kit key result.
+
+Preview inside Sanity's Presentation tool for those four page types is untested from here. Under Rick's rule it doesn't hold anything up; test it the next time someone is in Studio.
+
+---
+
 ## 2026-10-13 — SWG Circular gets a permanent homepage section; Right Now reworked (live — all four steps done by Claude Code the same day; see the update at the end of this entry)
 
 Rick's direct request after a partners' meeting. Scope checklist: `SCOPE_CIRCULAR_HOMEPAGE.md`, same folder.

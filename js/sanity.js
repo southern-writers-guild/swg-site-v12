@@ -642,7 +642,7 @@
    // not, same as featured fiction.
    // linkToPage wraps the whole card in a real internal link to the
    // video's own individual page (only exists for documents with a slug —
-   // see api/preview-video.js / the-work/videos/video). Off by default so
+   // see api/preview-doc.js / the-work/videos/video). Off by default so
    // every existing caller (the crowded the-work/videos listing, the
    // homepage, the-work/interviews) renders exactly as before — that
    // whole-card-links-out design was the confirmed root cause of an

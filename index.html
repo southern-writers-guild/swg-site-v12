@@ -220,8 +220,8 @@
   <section class="section" id="circular-section">
     <div class="container">
       <div class="section-header" style="margin-bottom:1.25rem;">
-        <span class="section-header-title">The SWG Circular</span>
-        <a href="/the-porch/circular/" class="section-see-all">Circular Archive &#8594;</a>
+        <span class="section-header-title" id="circular-heading">The SWG Circular</span>
+        <a href="/the-porch/circular/" class="section-see-all"><span id="circular-archive-label">Circular Archive</span> &#8594;</a>
       </div>
       <div class="grid grid--circular" id="circular-grid"></div>
     </div>
@@ -232,7 +232,7 @@
   <section class="section">
     <div class="container">
       <div class="section-header" style="margin-bottom:1.25rem;">
-        <span class="section-header-title">Right Now</span>
+        <span class="section-header-title" id="right-now-heading">Right Now</span>
       </div>
       <div class="grid grid--3" id="highlights-grid"></div>
     </div>
@@ -359,6 +359,17 @@
         if (headlineEl && home.heroHeadline) headlineEl.textContent = home.heroHeadline
         if (subheadEl && home.heroSubhead) subheadEl.textContent = home.heroSubhead
         if (blurbEl && home.missionBlurb) blurbEl.textContent = home.missionBlurb
+        // Section wording: each falls back to the text already in the
+        // markup when the field is left blank in Studio.
+        const wording = [
+          ['circular-heading', home.circularHeading],
+          ['circular-archive-label', home.circularArchiveLabel],
+          ['right-now-heading', home.rightNowHeading],
+        ]
+        wording.forEach(([id, value]) => {
+          const el = document.getElementById(id)
+          if (el && value) el.textContent = value
+        })
         const scratchesEl = document.getElementById('scratches-list')
         if (scratchesEl && home.scratchQuotes && home.scratchQuotes.length) {
           scratchesEl.innerHTML = home.scratchQuotes.map(q => {

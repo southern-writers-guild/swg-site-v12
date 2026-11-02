@@ -217,7 +217,7 @@ This is the actual destination behind the site rebuild — not a punch-list item
 
 Steps 1 and 2 are the true prerequisites; nothing past them works without both in place.
 
-**Vercel Hobby plan limit:** 12 serverless functions per deployment. Currently at 11 of 12 as of 2026-09-01, after consolidating several preview endpoints into one shared function. Before adding another dedicated preview endpoint for a new content type, either extend the existing shared function or plan for consolidation first — otherwise the next deploy will fail outright, not degrade gracefully.
+**Vercel Hobby plan limit:** 12 serverless functions per deployment. Was 12 of 12 by 2026-11-02 (api/tarot.js made the twelfth in September; earlier "11 of 12" notes were stale). The 2026-11-02 Circular stage 1 combined the four slug-based preview endpoints (story, event, video, writer) into api/preview-doc.js, bringing it to 9 of 12. Count the .js files directly in api/ (not api/_lib/) rather than trusting this line. Before adding another dedicated preview endpoint for a new content type, either extend the existing shared function or plan for consolidation first — otherwise the next deploy will fail outright, not degrade gracefully.
 
 ## Hard limits
 

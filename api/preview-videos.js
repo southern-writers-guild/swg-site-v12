@@ -1,7 +1,7 @@
 import { createClient } from '@sanity/client';
 import { isValidPreviewRequest } from './_lib/preview.js';
 
-// Same pattern as api/preview-story.js, for guildVideo instead of
+// Same pattern as api/preview-doc.js, for guildVideo instead of
 // porchStory. guildVideo has no slug and no individual page — every
 // document resolves to one shared listing page (the-work/videos/), which
 // renders three separate sections from three separate queries
