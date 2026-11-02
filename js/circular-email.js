@@ -156,9 +156,10 @@ function heading(html) {
   return `<h2 style="margin:0 0 6px;font-family:${C.serif};font-size:28px;font-weight:normal;color:${C.ink};text-align:center;">${html}</h2>`
 }
 
-// "Line under the heading": 14pt in the serif (Rick, 2026-11-02).
+// "Line under the heading": reads exactly like the masthead tagline
+// (Rick, 2026-11-02): Georgia 19px italic, muted.
 function subheading(v, gap) {
-  return `<p style="margin:0 0 ${gap}px;font-family:${C.serif};font-size:14pt;line-height:1.4;color:${C.muted};text-align:center;">${inline(v)}</p>`
+  return `<p style="margin:0 0 ${gap}px;font-family:${C.serif};font-size:19px;font-style:italic;color:${C.muted};text-align:center;">${inline(v)}</p>`
 }
 
 function button(href, label) {

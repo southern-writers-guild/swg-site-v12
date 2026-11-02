@@ -903,11 +903,13 @@ ul, ol { list-style: none; }
   text-align: center;
   margin-bottom: 0.4rem;
 }
+/* "Line under the heading" reads exactly like the masthead tagline
+   (Rick, 2026-11-02): same font, size, italic and colour as .circ-tagline. */
 .circ-subheading {
   text-align: center;
   font-family: var(--font-serif);
-  font-size: 14pt;
-  line-height: 1.4;
+  font-style: italic;
+  font-size: 1.3rem;
   color: var(--text-muted);
   margin-bottom: var(--sp-md);
 }
