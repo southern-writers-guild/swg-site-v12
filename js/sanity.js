@@ -4,6 +4,7 @@
    ============================================================ */
 
    import { createClient } from '@sanity/client'
+   import { CIRCULAR_CARD_PROJECTION } from './circular-query.js'
 
    // Re-exported so pages never need their own @sanity/client/stega import —
    // strips stega's invisible edit-metadata characters before a value goes
@@ -75,21 +76,21 @@
     
    /* Generic fetch helper — same signature and behavior as before (resolves
       to the query result, throws on failure), now backed by the real client. */
-   export async function sanityFetch(query) {
-     return client.fetch(query)
+   export async function sanityFetch(query, params) {
+     return params ? client.fetch(query, params) : client.fetch(query)
    }
     
    /* ── Porch stories ─────────────────────────────────────────── */
     
    export async function fetchPorchStories(limit = 9) {
      return sanityFetch(
-       `*[_type == "porchStory" && featured == true] | order(publishedAt desc) [0...${limit}]`
+       `*[_type == "porchStory" && featured == true && !(isCircular == true)] | order(publishedAt desc) [0...${limit}]`
      )
    }
     
    export async function fetchAllPorchStories() {
      return sanityFetch(
-       `*[_type == "porchStory"] | order(publishedAt desc)`
+       `*[_type == "porchStory" && !(isCircular == true)] | order(publishedAt desc)`
      )
    }
 
@@ -104,7 +105,7 @@
 
    export async function fetchEssays(limit = 9) {
      return sanityFetch(
-       `*[_type == "porchStory" && essayFeatured == true] | order(publishedAt desc) [0...${limit}]`
+       `*[_type == "porchStory" && essayFeatured == true && !(isCircular == true)] | order(publishedAt desc) [0...${limit}]`
      )
    }
 
@@ -229,46 +230,54 @@
    }
 
    /* ── The SWG Circular ──────────────────────────────────────── */
-   /* A Circular is an ordinary Porch Story with "This is an SWG
-      Circular" (isCircular) ticked in Studio. Newest first by Published
-      Date. The homepage takes the first two (newest large, previous one
-      half size); the Circular Archive page (/the-porch/circular/) lists
-      them all. Circulars still appear in the regular Porch lists too. */
+   /* The Circular is its own publication: circularIssue documents in
+      Sanity, never Porch stories (Issue 1 is the one exception
+      underneath: a Porch story kept off every Porch list, which its
+      small archive entry points to via legacyPage). The homepage shows
+      the newest issue large and the one before it at half size; the
+      archive at /circular/ lists every issue. An issue opens at
+      /circular/<two-digit number>/; Issue 1 opens its old page. The
+      issue pages themselves are drawn by js/circular.js. */
 
-   export async function fetchCirculars(limit) {
+   export async function fetchCircularIssues(limit) {
      const slice = limit ? ` [0...${Number(limit)}]` : ''
      return sanityFetch(
-       `*[_type == "porchStory" && isCircular == true] | order(publishedAt desc)${slice}`
+       `*[_type == "circularIssue"] | order(issueDate desc)${slice}${CIRCULAR_CARD_PROJECTION}`
      )
    }
 
+   export function circularIssueHref(issue) {
+     if (issue.legacy && issue.legacy.slug) return `/the-porch/${issue.legacy.slug}/`
+     return `/circular/${String(issue.issueNumber).padStart(2, '0')}/`
+   }
+
+   export function circularIssueLabel(issue) {
+     return issue.issueLabel || `Issue No. ${String(issue.issueNumber).padStart(2, '0')}`
+   }
+
+   // size: 'lead' (homepage, large), 'prev' (homepage, half size) or
+   // 'archive' (one card in the archive grid).
    export function renderCircularCard(issue, size = 'lead') {
      const lead = size === 'lead'
-     const thumb = thumbSrc(issue, lead ? 1200 : 700)
-     const pos = thumbPosition(issue)
-     const hasSlug = Boolean(issue.slug && issue.slug.current)
-     const href = hasSlug ? `/the-porch/${issue.slug.current}/` : issue.substackUrl
-     const external = hasSlug ? '' : 'target="_blank" rel="noopener"'
-     const img = thumb
+     const href = circularIssueHref(issue)
+     const name = issue.seasonName || issue.publicationTitle || 'The SWG Circular'
+     const blurb = issue.tagline || (issue.legacy && issue.legacy.excerpt) || ''
+     const img = issue.coverUrl
        ? `<div class="circular-card-image">
-            <img src="${esc(thumb)}" alt="${esc(issue.title)}" style="object-position:${pos};">
+            <img src="${esc(issue.coverUrl)}?w=${lead ? 1000 : 700}&auto=format" alt="${esc(name)}">
           </div>`
        : ''
-     const excerpt = issue.excerpt
-       ? (lead || issue.excerpt.length <= 140
-           ? issue.excerpt
-           : issue.excerpt.slice(0, 140).replace(/\s+\S*$/, '') + '…')
-       : ''
-     const label = lead
-       ? `Latest issue &nbsp;·&nbsp; ${esc(formatDate(issue.publishedAt))}`
-       : `Previous issue &nbsp;·&nbsp; ${esc(formatDate(issue.publishedAt))}`
+     const date = issue.issueDate ? ` &nbsp;·&nbsp; ${esc(formatDate(issue.issueDate))}` : ''
+     const label = size === 'lead'
+       ? `Latest issue &nbsp;·&nbsp; ${esc(circularIssueLabel(issue))}`
+       : `${esc(circularIssueLabel(issue))}${date}`
      return `
-       <a href="${esc(href || '#')}" ${external} class="card circular-card ${lead ? 'card--highlight circular-card--lead' : 'card--dim circular-card--prev'}${thumb ? '' : ' circular-card--no-image'}">
+       <a href="${esc(href)}" class="card circular-card ${lead ? 'card--highlight circular-card--lead' : 'card--dim circular-card--prev'}${img ? '' : ' circular-card--no-image'}">
          ${img}
          <div class="circular-card-text">
            <span class="card-label">${label}</span>
-           <h2 class="card-title${lead ? ' circular-card-title' : ' card-title--sm'}">${esc(issue.title)}</h2>
-           ${excerpt ? `<p class="card-body"${lead ? '' : ' style="font-size:0.88rem;"'}>${esc(excerpt)}</p>` : ''}
+           <h2 class="card-title${lead ? ' circular-card-title' : ' card-title--sm'}">${esc(name)}</h2>
+           ${blurb ? `<p class="card-body"${lead ? '' : ' style="font-size:0.88rem;"'}>${esc(blurb)}</p>` : ''}
            <span class="circular-card-cta">${lead ? 'Read the Circular' : 'Read'} &#8594;</span>
          </div>
        </a>`

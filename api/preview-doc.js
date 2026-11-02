@@ -1,5 +1,6 @@
 import { createClient } from '@sanity/client';
 import { isValidPreviewRequest } from './_lib/preview.js';
+import { CIRCULAR_ISSUE_BY_ADDRESS } from '../js/circular-query.js';
 
 // One preview endpoint for every document that has its own page, found by
 // slug. Replaces four near-identical single-type files (preview-story.js,
@@ -35,6 +36,9 @@ const QUERIES = {
   event: `*[_type == "event" && slug.current == $slug][0]`,
   guildVideo: `*[_type == "guildVideo" && slug.current == $slug][0]`,
   writer: `*[_type == "writer" && slug.current == $slug][0] {${WRITER_FIELDS}}`,
+  // A Circular issue is addressed by its number ("02"), passed as slug;
+  // the shared query (js/circular-query.js) reads it as $issue.
+  circularIssue: CIRCULAR_ISSUE_BY_ADDRESS,
 };
 
 export default async function handler(req, res) {
@@ -72,7 +76,7 @@ export default async function handler(req, res) {
   });
 
   try {
-    const result = await client.fetch(QUERIES[type], { slug });
+    const result = await client.fetch(QUERIES[type], { slug, issue: slug });
     res.setHeader('Cache-Control', 'no-store');
     return res.status(200).json({ result });
   } catch (err) {

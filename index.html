@@ -221,7 +221,7 @@
     <div class="container">
       <div class="section-header" style="margin-bottom:1.25rem;">
         <span class="section-header-title" id="circular-heading">The SWG Circular</span>
-        <a href="/the-porch/circular/" class="section-see-all"><span id="circular-archive-label">Circular Archive</span> &#8594;</a>
+        <a href="/circular/" class="section-see-all"><span id="circular-archive-label">Circular Archive</span> &#8594;</a>
       </div>
       <div class="grid grid--circular" id="circular-grid"></div>
     </div>
@@ -294,15 +294,14 @@
   <script src="/js/nav.js"></script>
 
   <script type="module">
-    import { fetchRightNow, fetchCirculars, renderCircularCard, renderPorchCard, renderVideoCard, showLoading, showError, fetchHomeContent } from '/js/sanity.js'
+    import { fetchRightNow, fetchCircularIssues, renderCircularCard, renderPorchCard, renderVideoCard, showLoading, showError, fetchHomeContent } from '/js/sanity.js'
 
-    // The SWG Circular — newest issue large, the one before it half size.
-    // Both chosen automatically from Porch Stories ticked "This is an SWG
-    // Circular"; publishing a new issue shifts the older ones along, and
-    // everything older lives on /the-porch/circular/.
+    // The SWG Circular — newest issue large, the one before it half size,
+    // both chosen automatically from published Circular issues (newest
+    // Issue date first); everything older lives on /circular/.
     const circularGrid = document.getElementById('circular-grid')
     showLoading(circularGrid)
-    fetchCirculars(2)
+    fetchCircularIssues(2)
       .then(issues => {
         if (!issues || !issues.length) {
           circularGrid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:2rem;color:var(--text-faint);font-family:var(--font-serif);font-style:italic;font-size:0.95rem;">The next Circular is on its way.</div>'

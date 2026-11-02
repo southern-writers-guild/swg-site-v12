@@ -16,6 +16,9 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const pages = [
   'index.html',
   '404.html',
+  'circular/index.html',
+  'circular/issue/index.html',
+  'circular/piece/index.html',
   'events/index.html',
   'events/archive/index.html',
   'events/event/index.html',
@@ -26,7 +29,6 @@ const pages = [
   'the-house/guidelines/index.html',
   'the-porch/index.html',
   'the-porch/archive/index.html',
-  'the-porch/circular/index.html',
   'the-porch/story/index.html',
   'the-work/index.html',
   'the-work/books/index.html',

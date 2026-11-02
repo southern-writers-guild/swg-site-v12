@@ -48,10 +48,13 @@ const EVENTS_ROOT_PATH_PATTERN = /^\/events\/?$/;
 // Sanity-fetched content before now either, so neither had an entry here.
 const SHOP_PATH_PATTERN = /^\/shop\/?$/;
 const WELCOME_PATH_PATTERN = /^\/welcome\/?$/;
+// SWG Circular: the archive, an issue (/circular/02/) and a piece inside it.
+const CIRCULAR_PATH_PATTERN = /^\/circular(?:\/[0-9]+(?:\/[a-z0-9]+(?:-[a-z0-9]+)*)?)?\/?$/;
 
 function isAllowedRedirectPath(path) {
   return (
     path === '/' ||
+    CIRCULAR_PATH_PATTERN.test(path) ||
     PORCH_PATH_PATTERN.test(path) ||
     PORCH_ROOT_PATH_PATTERN.test(path) ||
     EVENT_PATH_PATTERN.test(path) ||

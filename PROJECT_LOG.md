@@ -6,6 +6,62 @@ Read this at the start of any SWG session, same as `CLAUDE.md`.
 
 ---
 
+## 2026-11-02 (5) — SWG Circular stage 3: the web pages (written, NOT yet live — handed to Claude Code)
+
+Entry (4) is done: site commit `1794ea4`. Issue 2 is in Sanity as the unpublished draft `drafts.circular-issue-02`. It validates clean, and Rick's practice drafts are backed up in `Claude outputs/circular-02-import/backup-before-import.json` and in Claude Code's earlier scratchpad backup.
+
+Rick: build straight to the live site, with no private preview address. Partners review Issue 2 in the Visual Editor before publishing.
+
+**Site repo:**
+- `js/circular-query.js` (new) is the one shared GROQ for an issue: masthead, every block, the feature story, portraits, linked pages and the sign-off people. The site, `api/preview-doc.js` and the stage 5 email all use it. An issue is addressed by number: `/circular/02/`.
+- `js/circular.js` (new) draws an issue's front page and a piece's page. It loads only on Circular pages, and strips stega markers before using any value in logic or addresses.
+  - Piece addresses come from titles, with `-2` added for a repeat within an issue.
+  - With no typed teaser, the feature teaser skips lines that only repeat the story title or read "A Porch Story…".
+- New pages:
+  - `circular/index.html`: the archive, at `/circular/`.
+  - `circular/issue/index.html`: `/circular/:issue`. An issue with `legacyPage` (Issue 1) forwards to its old page.
+  - `circular/piece/index.html`: `/circular/:issue/:piece`.
+  - All three are added to `vite.config.js`, with rewrites in `vercel.json`.
+  - `/the-porch/circular/` now permanently redirects to `/circular/`. Delete the old `the-porch/circular/index.html` (step 3).
+- `js/sanity.js`:
+  - `sanityFetch` accepts params.
+  - The homepage Circular cards now read `circularIssue` (`fetchCircularIssues`, `renderCircularCard`, `circularIssueHref`, `circularIssueLabel`).
+  - Porch main grid, Porch all-stories page and The Work's Kitchen Table now exclude `isCircular` stories, which keeps Issue 1's old page off every list. Its own address still works.
+- `index.html`: the homepage reads issues, and its archive link goes to `/circular/`.
+- `api/preview.js` (the Visual Editor's entry point): `/circular/`, `/circular/<number>/` and `/circular/<number>/<piece>/` added to its allowed-page list. Without this, Presentation couldn't open Circular pages.
+- `api/preview-doc.js` now serves `type=circularIssue` (slug = issue address) through the shared query. Still one function; the count stays at 9 of 12.
+- `css/swg.css`: `.circ-*` styles, on brand.
+
+**Studio repo:**
+- The Feature block gains an optional **Byline** under More options. Blank shows "By" plus the story's Authors.
+- Porch `isCircular` is now hidden. It's kept because Issue 1's story uses it to stay off Porch lists.
+- `sanity.config.js`: Presentation routes `/circular/:issue` and `/circular/:issue/:piece`, plus locations for `circularIssue` (its page, the archive, the homepage).
+
+**Checked from here:**
+- Studio: `schema validate` gave 0 errors and 0 warnings; the build is clean.
+- Site: `npm run build` is clean.
+- The drawing code ran against Issue 2's real content: all five pieces resolve, and every link is correct.
+- Rendered and screenshotted at 1280px and 390px with the real pictures (stand-ins only for portraits and the Judaculla image). Two layout fixes followed: tall book covers are no longer cropped in teaser pictures, and a tall picture at the top of a piece is capped in height.
+- The shared GROQ ran against the live API with no syntax errors.
+
+**Not yet done. Order matters, so follow it:**
+1. **Studio:** commit `schemaTypes/circular-blocks.js`, `schemaTypes/porch-story.js` and `sanity.config.js`; push; then run `npx sanity@latest schema deploy` and `npx sanity deploy`.
+2. **Issue 1's archive entry:** copy `Claude outputs/circular-stage3` into the Studio root and run `npx sanity exec circular-stage3/create-issue-01-entry.mjs --with-user-token`. Move the folder back afterwards; commit nothing from it. This must happen BEFORE step 3, or the homepage Circular section will be empty.
+3. **Site:** delete `the-porch/circular/index.html` (its folder becomes empty), run `npm run build` to confirm, then commit everything from this entry and push to `main`. Leave `SCOPE_STORY_DISPLAY.md`, `.claude/` and `Claude outputs/` alone.
+4. **Verify live** (use `www.`):
+   - Homepage Circular section shows "Issue No. 01 · The SWG Circular", linking to `/the-porch/the-swg-circular/`.
+   - `/circular/` lists Issue 1.
+   - `/the-porch/circular/` redirects to `/circular/`.
+   - `/circular/02/` says it can't find the issue. That's correct while Issue 2 is a draft.
+   - The Porch all-stories page no longer lists "The SWG Circular"; its own page still loads.
+   - `/api/preview-doc?type=circularIssue&slug=02` returns 404 outside a preview session.
+   - The `api/` folder still holds 9 function files.
+5. Do not publish Issue 2.
+
+**Then Rick and the partners:** open Sanity's **Presentation** tab, go to `/circular/02/`, and review Issue 2 on its real page. Publish when ready.
+
+---
+
 ## 2026-11-02 (4) — Issue 2 loaded from the Drive doc (package ready, NOT yet run — handed to Claude Code)
 
 The simplified forms from entry (3) are deployed; the live Studio's published setup shows `circularFullPiece` and the "Rarely changed" fold. Rick asked Claude to enter Issue 2 rather than have the partners work out the forms. The aim, in his words: Grace gets a working, filled-in issue as the template, not an empty system.
