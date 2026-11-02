@@ -6,6 +6,48 @@ Read this at the start of any SWG session, same as `CLAUDE.md`.
 
 ---
 
+## 2026-11-02 (3) — Circular forms reworked: pieces inside their issue, then simplified (written, NOT yet deployed — handed to Claude Code)
+
+Stage 2 is deployed as Studio commit `3e7cfd9` and site commit `061587f`. Rick started entering Issue 2 and found the forms too complicated.
+
+The cause was a Claude design error. Each piece was a separate `circularPiece` document, linked from a teaser. That brought:
+- a three-way "Opens" choice on every link;
+- a second panel opening for "Create new";
+- each piece published separately, before the issue could be;
+- web-address clashes when a piece name repeats in a later issue;
+- a growing list of lookalike pieces.
+
+**Rick confirmed the model, 2026-11-02:** a piece lives only inside its issue and is reached only through that issue's front page. The archive lists issues, never pieces.
+
+**The rework (Studio repo only):**
+- `circular-piece.js` now defines `circularFullPiece`, an object written inside a Teasers entry rather than a separate document. It's a collapsible "Full piece" section with title, small label, byline, web address, top picture, text, layout and outside button. The web address must be unique within its own issue only, so later issues can reuse "what-im-up-to". The document type `circularPiece` no longer exists.
+- Each Teasers entry now has a **Full piece** and an **Or link to** box for things that already exist (a page on the site, or an outside address). Exactly one of the two is required.
+- `circularLink` is simplified to two boxes: a page on the site or an outside address, never both.
+- Link list items use the same link, and an outside link needs its own wording.
+- In the Sign-off, each writer is now picked with a **Name to show** ("MJ", "Rick", "Gray"). Left empty, the sign-off shows every writer.
+- The issue is one document, so it publishes with all its pieces in one step. The Releases question is gone.
+- Checked: `sanity schema validate` gave 0 errors and 0 warnings, and `sanity build` built cleanly on a scratch copy with auto-updates off there only. The repo's `sanity.cli.js` is untouched.
+
+**Second pass, same day, at Rick's request ("is this the cleanest Sanity can be?"):**
+- **No tabs.** The issue is one scrolling form: masthead at the top, Blocks below.
+- **No address boxes.** The issue's web address is worked out from the issue number (`/circular/02/`). A full piece's address is worked out from its title; the site adds -2, -3 if two pieces in one issue share a title. Both `slug` fields are gone.
+- **Rarely changed folds shut:** the line above the title, the title, and the issue-wording override.
+- **More options folds:**
+  - Feature shows the story and the teaser; heading, paragraph count, picture and button wording are folded.
+  - Each teaser entry shows name, short line, full piece and link wording; second line, portrait, picture and "Or link to" are folded.
+  - Sign-off folds its two wording boxes.
+- **`legacyPage` (Issue 1 only) is hidden and read-only** unless already set. Claude sets it when creating Issue 1's archive entry.
+- **A new issue starts laid out like the most recent published issue:** the same blocks and headings, the same writers, portraits and button wording, and the same piece labels and bylines. Its words are left blank: feature story, short lines, piece titles and text, Porch links. The next issue number and today's date fill in. With no earlier issue, it starts as Feature plus Sign-off. Nothing about the layout is written into code. Sanity's own Duplicate also works on any issue.
+- **Checked:** schema validate gave 0 errors and 0 warnings; the build is clean; the new-issue starting layout was tested against a sample issue.
+
+**Not yet done. Follow this order:**
+1. **Before deploying, take a backup.** Using the Studio CLI login, list every `circularIssue` and `circularPiece` document, drafts included, and save their full JSON to a backup file outside both repos. Report what exists: titles, which blocks and entries are filled, and any pieces. Rick may already have typed Issue 2 content.
+2. Commit the Studio changes and push. Then run `npx sanity@latest schema deploy` and `npx sanity deploy`.
+3. Delete nothing and migrate nothing. Report which parts of any existing Circular draft no longer fit the new forms: old `slug` fields, old link `kind`/`piece` fields, or separate `circularPiece` documents. Claude (Cowork) will carry the content into the new layout from the backup.
+4. Commit this PROJECT_LOG entry in the site repo and push.
+
+---
+
 ## 2026-11-02 (2) — SWG Circular rebuild, stage 2: Sanity forms (written, NOT yet deployed — handed to Claude Code)
 
 Stage 1 is live. It went out as Studio commit `5349bf5` and site commit `e217ddd`. Claude confirmed the home page directly: the three headings read as before, the Circular section shows Issue 1, and Right Now shows Tailgate, Fine Print and Buffalo Jump. The api/ folder has 9 function files. Kit key check deferred to stage 5.
