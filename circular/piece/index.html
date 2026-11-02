@@ -39,7 +39,7 @@
     // /circular/<issue>/<piece>/ — one piece, reachable only through its
     // issue. The piece is found inside the issue by its address, which is
     // made from its title; see issuePieces() in js/circular.js.
-    import { fetchIssue, renderPiece } from '/js/circular.js'
+    import { fetchIssue, renderPiece, publicationName } from '/js/circular.js'
     import { stegaClean } from '@sanity/client/stega'
 
     const el = document.getElementById('circ-piece')
@@ -55,7 +55,7 @@
       .then(issue => {
         const piece = issue && renderPiece(issue, slug)
         if (!piece) return missing('We couldn’t find that piece.')
-        document.title = `${piece.title} — ${stegaClean(issue.publicationTitle || 'The SWG Circular')} — Southern Writers Guild`
+        document.title = `${piece.title} — ${publicationName(issue)} — Southern Writers Guild`
         el.innerHTML = piece.html
       })
       .catch(() => missing('Something went wrong loading this piece.'))

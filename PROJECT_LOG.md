@@ -6,6 +6,59 @@ Read this at the start of any SWG session, same as `CLAUDE.md`.
 
 ---
 
+## 2026-11-02 (6) — Every Circular typing box gets an editing toolbar (written, NOT yet live — handed to Claude Code)
+
+Stage 3 went live at `0357beb` (Studio `a95a05e`). Issue 1's archive entry `circular-issue-01` is published; Issue 2 is still the draft `drafts.circular-issue-02`.
+
+**Rick's standing rule (2026-11-02), for the whole site, not just the Circular:**
+- Everything should be maximally flexible and easily edited by any of the three partners. That's why Sanity is here.
+- As little hard-coding as possible.
+- No hard blocks.
+- A full editing toolbar anywhere typing happens.
+
+**Circular, done here:**
+- **Studio:** new `schemaTypes/text-fields.js`.
+  - `writingField` is the full editor. It's used for the Feature teaser, each teaser's short line, the Sign-off closing line, Notes and full-piece text (Notes and pieces already had it).
+  - `lineField` is a one-line editor with bold, italic, underline, strike, code and links. A second paragraph gets a warning, never an error. It's used for:
+    - every heading and subheading;
+    - entry names and second lines;
+    - every button wording and link-list wording;
+    - the masthead's line above the title, title, issue wording, season and tagline;
+    - the Feature byline;
+    - piece title, label and byline, and the outside-button wording;
+    - sign-off names and wording.
+  - All defaults are now editor values. Studio previews read plain words.
+  - `circular-blocks.js` was rewritten whole; `circular-piece.js` and `circular-issue.js` were updated.
+- **Site:**
+  - `js/sanity.js` gains `renderInline()` and `plainTextOf()`; the homepage and archive cards use them.
+  - `js/circular.js` renders one-line boxes inline and writing boxes as paragraphs. It accepts both editor values and old plain strings, so nothing breaks mid-change.
+  - Piece addresses, alt text and `<title>` use plain words.
+  - `css/swg.css` gains spacing for paragraphs inside teaser lines and the closing line.
+- **Checked:**
+  - `schema validate` gave 0 errors and 0 warnings, and the Studio build is clean.
+  - The site build is clean.
+  - Issue 2, converted, was drawn and screenshotted. It looks identical to before; no "[object" leaks.
+  - The conversion is idempotent.
+
+**Data conversion package:** `Claude outputs/circular-stage3b/`.
+- `transform.mjs` (tested) and `convert-text-fields.mjs`, which:
+  - backs up every `circularIssue`;
+  - converts plain-text values to editor values, keeping every word, with paragraphs split on blank lines;
+  - writes each back with createOrReplace, so a published issue stays published and a draft stays a draft.
+
+**Not yet done. Follow this order:**
+1. **Studio:** commit `schemaTypes/text-fields.js`, `circular-blocks.js`, `circular-piece.js` and `circular-issue.js`; push; then run `npx sanity@latest schema deploy` and `npx sanity deploy`.
+2. **Convert the data:** copy `Claude outputs/circular-stage3b` into the Studio root, run `npx sanity exec circular-stage3b/convert-text-fields.mjs --with-user-token`, and report the output. Move the folder back, including its backup; commit nothing from it. Then run Sanity's document validation and report anything on `circular-issue-01` or `drafts.circular-issue-02`.
+3. **Site:** `npm run build`, commit this entry's files, push to `main`.
+4. **Verify live:**
+   - The homepage Circular card and `/circular/` still read "Issue No. 01 · The SWG Circular" with Issue 1's tagline, with no "[object" text anywhere.
+   - `/circular/02/` still says it can't find the issue, which is correct while it's a draft.
+5. Do not publish Issue 2.
+
+**Next, site-wide (Rick's rule above):** audit every other Sanity form for plain typing boxes that should have the toolbar, such as homepage hero, House, Join, Welcome, page copy and excerpts. Bring Rick the list before changing anything.
+
+---
+
 ## 2026-11-02 (5) — SWG Circular stage 3: the web pages (written, NOT yet live — handed to Claude Code)
 
 Entry (4) is done: site commit `1794ea4`. Issue 2 is in Sanity as the unpublished draft `drafts.circular-issue-02`. It validates clean, and Rick's practice drafts are backed up in `Claude outputs/circular-02-import/backup-before-import.json` and in Claude Code's earlier scratchpad backup.

@@ -229,6 +229,42 @@
      return items
    }
 
+   /* ── One-line editor values ────────────────────────────────── */
+   /* Circular headings, names and button wording are one-line editor
+      values (bold, italic, underline, strike, code, links), or plain
+      strings in older documents. renderInline() turns either into inline
+      HTML; plainTextOf() into plain words (for alt text and <title>). */
+
+   export function renderInline(value) {
+     if (!value) return ''
+     if (typeof value === 'string') return esc(value)
+     if (!Array.isArray(value)) return ''
+     return value.filter(b => b && b._type === 'block').map(block => {
+       const defs = block.markDefs || []
+       return (block.children || []).map(span => {
+         let t = esc(span.text || '').replace(/\n/g, '<br>')
+         ;(span.marks || []).forEach(mark => {
+           const def = defs.find(d => d._key === mark)
+           if (def && def._type === 'link' && def.href) t = `<a href="${esc(def.href)}" target="_blank" rel="noopener">${t}</a>`
+           else if (mark === 'strong') t = `<strong>${t}</strong>`
+           else if (mark === 'em') t = `<em>${t}</em>`
+           else if (mark === 'underline') t = `<u>${t}</u>`
+           else if (mark === 'strike-through') t = `<s>${t}</s>`
+           else if (mark === 'code') t = `<code>${t}</code>`
+         })
+         return t
+       }).join('')
+     }).join('<br>')
+   }
+
+   export function plainTextOf(value) {
+     if (!value) return ''
+     if (typeof value === 'string') return value
+     if (!Array.isArray(value)) return ''
+     return value.filter(b => b && b._type === 'block')
+       .map(b => (b.children || []).map(c => c.text || '').join('')).join(' ')
+   }
+
    /* ── The SWG Circular ──────────────────────────────────────── */
    /* The Circular is its own publication: circularIssue documents in
       Sanity, never Porch stories (Issue 1 is the one exception
@@ -252,7 +288,7 @@
    }
 
    export function circularIssueLabel(issue) {
-     return issue.issueLabel || `Issue No. ${String(issue.issueNumber).padStart(2, '0')}`
+     return plainTextOf(issue.issueLabel) || `Issue No. ${String(issue.issueNumber).padStart(2, '0')}`
    }
 
    // size: 'lead' (homepage, large), 'prev' (homepage, half size) or
@@ -260,15 +296,16 @@
    export function renderCircularCard(issue, size = 'lead') {
      const lead = size === 'lead'
      const href = circularIssueHref(issue)
-     const name = issue.seasonName || issue.publicationTitle || 'The SWG Circular'
-     const blurb = issue.tagline || (issue.legacy && issue.legacy.excerpt) || ''
+     const nameHtml = renderInline(issue.seasonName) || renderInline(issue.publicationTitle) || 'The SWG Circular'
+     const nameText = plainTextOf(issue.seasonName) || plainTextOf(issue.publicationTitle) || 'The SWG Circular'
+     const blurbHtml = renderInline(issue.tagline) || esc((issue.legacy && issue.legacy.excerpt) || '')
      const img = issue.coverUrl
        ? `<div class="circular-card-image">
-            <img src="${esc(issue.coverUrl)}?w=${lead ? 1000 : 700}&auto=format" alt="${esc(name)}">
+            <img src="${esc(issue.coverUrl)}?w=${lead ? 1000 : 700}&auto=format" alt="${esc(nameText)}">
           </div>`
        : ''
      const date = issue.issueDate ? ` &nbsp;·&nbsp; ${esc(formatDate(issue.issueDate))}` : ''
-     const label = size === 'lead'
+     const label = lead
        ? `Latest issue &nbsp;·&nbsp; ${esc(circularIssueLabel(issue))}`
        : `${esc(circularIssueLabel(issue))}${date}`
      return `
@@ -276,8 +313,8 @@
          ${img}
          <div class="circular-card-text">
            <span class="card-label">${label}</span>
-           <h2 class="card-title${lead ? ' circular-card-title' : ' card-title--sm'}">${esc(name)}</h2>
-           ${blurb ? `<p class="card-body"${lead ? '' : ' style="font-size:0.88rem;"'}>${esc(blurb)}</p>` : ''}
+           <h2 class="card-title${lead ? ' circular-card-title' : ' card-title--sm'}">${nameHtml}</h2>
+           ${blurbHtml ? `<p class="card-body"${lead ? '' : ' style="font-size:0.88rem;"'}>${blurbHtml}</p>` : ''}
            <span class="circular-card-cta">${lead ? 'Read the Circular' : 'Read'} &#8594;</span>
          </div>
        </a>`

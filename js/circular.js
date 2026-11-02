@@ -14,11 +14,22 @@
    ============================================================ */
 
 import { stegaClean } from '@sanity/client/stega'
-import { sanityFetch, renderPortableText, esc } from './sanity.js'
+import { sanityFetch, renderPortableText, renderInline, plainTextOf, esc } from './sanity.js'
 import { CIRCULAR_ISSUE_BY_ADDRESS } from './circular-query.js'
 
 const clean = v => (typeof v === 'string' ? stegaClean(v) : v)
 const pad = n => String(n).padStart(2, '0')
+
+// Editor values: one-line boxes render inline, writing boxes as
+// paragraphs; older documents may still hold plain strings.
+const inline = v => renderInline(v)
+const plain = v => clean(plainTextOf(v))
+const has = v => Boolean(plain(v).trim())
+function writing(v) {
+  if (!v) return ''
+  if (Array.isArray(v)) return renderPortableText(v)
+  return paragraphs(v)
+}
 
 /* ── Fetching ───────────────────────────────────────────────── */
 
@@ -44,12 +55,22 @@ export function issuePath(issue) {
   return `/circular/${pad(clean(issue.issueNumber))}/`
 }
 
+// Plain words, for <title> and alt text.
 export function issueLabel(issue) {
-  return issue.issueLabel || `Issue No. ${pad(clean(issue.issueNumber))}`
+  return plain(issue.issueLabel) || `Issue No. ${pad(clean(issue.issueNumber))}`
+}
+
+// The publication's name in plain words, for <title>.
+export function publicationName(issue) {
+  return plain(issue.publicationTitle) || 'The SWG Circular'
+}
+
+function issueLabelHtml(issue) {
+  return has(issue.issueLabel) ? inline(issue.issueLabel) : `Issue No. ${pad(clean(issue.issueNumber))}`
 }
 
 function slugify(text) {
-  return String(clean(text) || '')
+  return String(text || '')
     .normalize('NFKD').replace(/[̀-ͯ]/g, '')
     .toLowerCase()
     .replace(/[‘’']/g, '')
@@ -67,7 +88,7 @@ export function issuePieces(issue) {
     ;(block.entries || []).forEach(entry => {
       const p = entry.piece
       if (!p || !Array.isArray(p.body) || !p.body.length) return
-      let slug = slugify(p.title)
+      let slug = slugify(plain(p.title))
       used[slug] = (used[slug] || 0) + 1
       if (used[slug] > 1) slug = `${slug}-${used[slug]}`
       out.push({ slug, entry, piece: p, block })
@@ -122,11 +143,11 @@ function paragraphs(text) {
 export function renderMasthead(issue) {
   return `
     <header class="circ-masthead">
-      ${issue.presenterLine ? `<p class="circ-presents">${esc(issue.presenterLine)}</p>` : ''}
-      <h1 class="circ-title">${esc(issue.publicationTitle || 'The SWG Circular')}</h1>
+      ${has(issue.presenterLine) ? `<p class="circ-presents">${inline(issue.presenterLine)}</p>` : ''}
+      <h1 class="circ-title">${has(issue.publicationTitle) ? inline(issue.publicationTitle) : 'The SWG Circular'}</h1>
       <div class="circ-rule"></div>
-      <p class="circ-issue">${esc(issueLabel(issue))}${issue.seasonName ? ` &nbsp;·&nbsp; ${esc(issue.seasonName)}` : ''}</p>
-      ${issue.tagline ? `<p class="circ-tagline">${esc(issue.tagline)}</p>` : ''}
+      <p class="circ-issue">${issueLabelHtml(issue)}${has(issue.seasonName) ? ` &nbsp;·&nbsp; ${inline(issue.seasonName)}` : ''}</p>
+      ${has(issue.tagline) ? `<p class="circ-tagline">${inline(issue.tagline)}</p>` : ''}
     </header>`
 }
 
@@ -139,8 +160,8 @@ function renderFeature(block) {
   // skipping any line that only repeats the title or a "A Porch Story"
   // style subtitle line that some imported stories begin with.
   let teaser = ''
-  if (block.teaser) {
-    teaser = paragraphs(block.teaser)
+  if (has(block.teaser)) {
+    teaser = writing(block.teaser)
   } else {
     const n = Number(clean(block.openingParagraphs)) || 3
     const opening = (story.opening || []).filter(t => {
@@ -149,18 +170,18 @@ function renderFeature(block) {
     }).slice(0, n)
     teaser = opening.map(t => `<p>${esc(t)}</p>`).join('')
   }
-  const byline = block.byline || (story.authors ? `By ${story.authors}` : '')
+  const byline = has(block.byline) ? inline(block.byline) : (story.authors ? `By ${esc(story.authors)}` : '')
   const picture = block.imageUrl || story.imageUrl
   return `
     <section class="circ-block circ-feature">
-      ${block.heading ? `<p class="circ-eyebrow">${esc(block.heading)}</p>` : ''}
+      ${has(block.heading) ? `<p class="circ-eyebrow">${inline(block.heading)}</p>` : ''}
       <div class="circ-feature-grid${picture ? '' : ' circ-feature-grid--text'}">
         ${picture ? anchor(target, `<img src="${img(picture, 1100)}" alt="${esc(title)}">`, 'circ-feature-image') : ''}
         <div class="circ-feature-text">
           <h2 class="circ-feature-title">${anchor(target, esc(story.title))}</h2>
-          ${byline ? `<p class="circ-byline">${esc(byline)}</p>` : ''}
+          ${byline ? `<p class="circ-byline">${byline}</p>` : ''}
           <div class="circ-teaser">${teaser}</div>
-          ${target ? `<p>${anchor(target, `${esc(block.buttonLabel || 'Read the full story')} &#8594;`, 'circ-button')}</p>` : ''}
+          ${target ? `<p>${anchor(target, `${has(block.buttonLabel) ? inline(block.buttonLabel) : 'Read the full story'} &#8594;`, 'circ-button')}</p>` : ''}
         </div>
       </div>
     </section>`
@@ -172,23 +193,23 @@ function renderTeasers(block, issue, pieces) {
     const target = entryTarget(entry, issue, pieces)
     const picUrl = look === 'portraits' ? (entry.portraitUrl || entry.imageUrl) : (entry.imageUrl || entry.portraitUrl)
     const pic = picUrl
-      ? anchor(target, `<img src="${img(picUrl, look === 'portraits' ? 240 : 800)}" alt="${esc(clean(entry.title))}">`, `circ-entry-pic circ-entry-pic--${look}`)
+      ? anchor(target, `<img src="${img(picUrl, look === 'portraits' ? 240 : 800)}" alt="${esc(plain(entry.title))}">`, `circ-entry-pic circ-entry-pic--${look}`)
       : ''
     return `
       <article class="circ-entry circ-entry--${look}">
         ${pic}
         <div class="circ-entry-text">
-          <h3 class="circ-entry-title">${anchor(target, esc(entry.title))}</h3>
-          ${entry.subtitle ? `<p class="circ-entry-sub">${esc(entry.subtitle)}</p>` : ''}
-          ${entry.text ? `<p class="circ-entry-body">${esc(entry.text)}</p>` : ''}
-          ${target ? `<p class="circ-entry-more">${anchor(target, `${esc(entry.buttonLabel || 'Read more')} &#8594;`)}</p>` : ''}
+          <h3 class="circ-entry-title">${anchor(target, inline(entry.title))}</h3>
+          ${has(entry.subtitle) ? `<p class="circ-entry-sub">${inline(entry.subtitle)}</p>` : ''}
+          ${has(entry.text) ? `<div class="circ-entry-body">${writing(entry.text)}</div>` : ''}
+          ${target ? `<p class="circ-entry-more">${anchor(target, `${has(entry.buttonLabel) ? inline(entry.buttonLabel) : 'Read more'} &#8594;`)}</p>` : ''}
         </div>
       </article>`
   }).join('')
   return `
     <section class="circ-block circ-teasers circ-teasers--${look}">
-      ${block.heading ? `<h2 class="circ-heading">${esc(block.heading)}</h2>` : ''}
-      ${block.subheading ? `<p class="circ-subheading">${esc(block.subheading)}</p>` : ''}
+      ${has(block.heading) ? `<h2 class="circ-heading">${inline(block.heading)}</h2>` : ''}
+      ${has(block.subheading) ? `<p class="circ-subheading">${inline(block.subheading)}</p>` : ''}
       <div class="circ-entries">${entries}</div>
     </section>`
 }
@@ -197,16 +218,16 @@ function renderLinkList(block) {
   const items = (block.items || []).map(item => {
     const target = linkTarget(item.link)
     const page = (item.link && item.link.page) || {}
-    const label = item.label || [page.title || page.characterName, page.authors].filter(Boolean).join(' from ')
+    const label = has(item.label) ? inline(item.label) : esc([page.title || page.characterName, page.authors].filter(Boolean).join(' from '))
     if (!label) return ''
     const picUrl = item.imageUrl || page.imageUrl
     const pic = picUrl ? `<img src="${img(picUrl, 200)}" alt="">` : '<span class="circ-link-blank"></span>'
-    return `<li>${anchor(target, `${pic}<span class="circ-link-label">${esc(label)}</span><span class="circ-link-arrow">&#8594;</span>`, 'circ-link')}</li>`
+    return `<li>${anchor(target, `${pic}<span class="circ-link-label">${label}</span><span class="circ-link-arrow">&#8594;</span>`, 'circ-link')}</li>`
   }).join('')
   return `
     <section class="circ-block circ-linklist">
-      ${block.heading ? `<h2 class="circ-heading">${esc(block.heading)}</h2>` : ''}
-      ${block.subheading ? `<p class="circ-subheading">${esc(block.subheading)}</p>` : ''}
+      ${has(block.heading) ? `<h2 class="circ-heading">${inline(block.heading)}</h2>` : ''}
+      ${has(block.subheading) ? `<p class="circ-subheading">${inline(block.subheading)}</p>` : ''}
       <ul class="circ-links">${items}</ul>
     </section>`
 }
@@ -214,7 +235,7 @@ function renderLinkList(block) {
 function renderNote(block) {
   return `
     <section class="circ-block circ-note">
-      ${block.heading ? `<h2 class="circ-heading">${esc(block.heading)}</h2>` : ''}
+      ${has(block.heading) ? `<h2 class="circ-heading">${inline(block.heading)}</h2>` : ''}
       <div class="prose">${renderPortableText(block.body || [])}</div>
     </section>`
 }
@@ -223,14 +244,14 @@ function renderSignOff(block) {
   const people = clean(block.showWriters) === false ? [] : (block.people || [])
   const row = people.map(p => {
     const target = p.slug ? { href: `/writers/${clean(p.slug)}/`, external: false } : null
-    const photo = p.photoUrl ? `<img src="${img(p.photoUrl, 200)}" alt="${esc(clean(p.name))}">` : '<span class="circ-person-blank"></span>'
-    return anchor(target, `${photo}<span>${esc(p.name)}</span>`, 'circ-person')
+    const photo = p.photoUrl ? `<img src="${img(p.photoUrl, 200)}" alt="${esc(plain(p.name))}">` : '<span class="circ-person-blank"></span>'
+    return anchor(target, `${photo}<span>${inline(p.name)}</span>`, 'circ-person')
   }).join('')
   return `
     <section class="circ-block circ-signoff">
-      ${block.closingLine ? `<p class="circ-closing">${esc(block.closingLine)}</p>` : ''}
-      ${row ? `${block.writersLabel ? `<p class="circ-eyebrow">${esc(block.writersLabel)}</p>` : ''}<div class="circ-people">${row}</div>` : ''}
-      <p><a href="/" class="circ-button">${esc(block.siteLinkLabel || 'Visit the Southern Writers Guild')} &#8594;</a></p>
+      ${has(block.closingLine) ? `<div class="circ-closing">${writing(block.closingLine)}</div>` : ''}
+      ${row ? `${has(block.writersLabel) ? `<p class="circ-eyebrow">${inline(block.writersLabel)}</p>` : ''}<div class="circ-people">${row}</div>` : ''}
+      <p><a href="/" class="circ-button">${has(block.siteLinkLabel) ? inline(block.siteLinkLabel) : 'Visit the Southern Writers Guild'} &#8594;</a></p>
     </section>`
 }
 
@@ -263,23 +284,23 @@ export function renderPiece(issue, slug) {
     ? `<div class="circ-piece-lead">${renderPortableText([{ ...piece.leadImage, _type: 'image', size: 'full' }])}</div>`
     : ''
   const button = piece.outsideButton && piece.outsideButton.url
-    ? `<p style="margin-top:var(--sp-md);"><a href="${esc(clean(piece.outsideButton.url))}" target="_blank" rel="noopener" class="circ-button">${esc(piece.outsideButton.label || 'Visit')} &#8594;</a></p>`
+    ? `<p style="margin-top:var(--sp-md);"><a href="${esc(clean(piece.outsideButton.url))}" target="_blank" rel="noopener" class="circ-button">${has(piece.outsideButton.label) ? inline(piece.outsideButton.label) : 'Visit'} &#8594;</a></p>`
     : ''
   const others = pieces.filter((_, j) => j !== i).map(p =>
-    `<li><a href="${issuePath(issue)}${p.slug}/">${esc(p.piece.title)}</a>${p.piece.byline ? ` <span>${esc(p.piece.byline)}</span>` : ''}</li>`
+    `<li><a href="${issuePath(issue)}${p.slug}/">${inline(p.piece.title)}</a>${has(p.piece.byline) ? ` <span>${inline(p.piece.byline)}</span>` : ''}</li>`
   ).join('')
   return {
-    title: clean(piece.title),
+    title: plain(piece.title),
     html: `
-      <p class="circ-piece-issue"><a href="${issuePath(issue)}">${esc(issue.publicationTitle || 'The SWG Circular')} &nbsp;·&nbsp; ${esc(issueLabel(issue))}${issue.seasonName ? ` &nbsp;·&nbsp; ${esc(issue.seasonName)}` : ''}</a></p>
-      ${piece.columnLabel ? `<p class="circ-eyebrow">${esc(piece.columnLabel)}</p>` : ''}
-      <h1 class="circ-piece-title">${esc(piece.title)}</h1>
-      ${piece.byline ? `<p class="circ-piece-byline">${portrait}<span>${esc(piece.byline)}</span></p>` : ''}
+      <p class="circ-piece-issue"><a href="${issuePath(issue)}">${esc(plain(issue.publicationTitle) || 'The SWG Circular')} &nbsp;·&nbsp; ${esc(issueLabel(issue))}${has(issue.seasonName) ? ` &nbsp;·&nbsp; ${esc(plain(issue.seasonName))}` : ''}</a></p>
+      ${has(piece.columnLabel) ? `<p class="circ-eyebrow">${inline(piece.columnLabel)}</p>` : ''}
+      <h1 class="circ-piece-title">${inline(piece.title)}</h1>
+      ${has(piece.byline) ? `<p class="circ-piece-byline">${portrait}<span>${inline(piece.byline)}</span></p>` : ''}
       ${lead}
       <div class="prose${layoutClass}">${renderPortableText(piece.body)}</div>
       ${button}
       <nav class="circ-piece-nav">
-        <a href="${issuePath(issue)}" class="circ-button">&#8592; Back to ${esc(issueLabel(issue))}</a>
+        <a href="${issuePath(issue)}" class="circ-button">&#8592; Back to ${issueLabelHtml(issue)}</a>
         ${others ? `<p class="circ-eyebrow" style="margin-top:var(--sp-md);">Also in this issue</p><ul class="circ-also">${others}</ul>` : ''}
       </nav>`
   }

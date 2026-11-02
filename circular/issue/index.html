@@ -38,7 +38,7 @@
   <script type="module">
     // /circular/<issue>/ — one issue's front page. The address segment is
     // the issue number (e.g. "02"); see js/circular.js.
-    import { fetchIssue, renderIssue, issueLabel } from '/js/circular.js'
+    import { fetchIssue, renderIssue, issueLabel, publicationName } from '/js/circular.js'
     import { stegaClean } from '@sanity/client/stega'
 
     const el = document.getElementById('circ-issue')
@@ -55,7 +55,7 @@
           window.location.replace(`/the-porch/${stegaClean(issue.legacy.slug)}/`)
           return
         }
-        document.title = `${stegaClean(issueLabel(issue))} — ${stegaClean(issue.publicationTitle || 'The SWG Circular')} — Southern Writers Guild`
+        document.title = `${issueLabel(issue)} — ${publicationName(issue)} — Southern Writers Guild`
         el.innerHTML = renderIssue(issue)
       })
       .catch(() => missing('Something went wrong loading this issue.'))
