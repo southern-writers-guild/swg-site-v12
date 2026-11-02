@@ -6,6 +6,40 @@ Read this at the start of any SWG session, same as `CLAUDE.md`.
 
 ---
 
+## 2026-11-02 (4) — Issue 2 loaded from the Drive doc (package ready, NOT yet run — handed to Claude Code)
+
+The simplified forms from entry (3) are deployed; the live Studio's published setup shows `circularFullPiece` and the "Rarely changed" fold. Rick asked Claude to enter Issue 2 rather than have the partners work out the forms. The aim, in his words: Grace gets a working, filled-in issue as the template, not an empty system.
+
+**Source:** the Drive doc "SOUTHERN WRITERS GUILD PRESENTS" (owner turtlemeatpodcast@, last edited 2026-11-02 04:09 UTC). Rick calls it the latest version; Grace may still revise it. Once loaded, **Sanity is the working copy.** Later Drive edits don't flow across: they're made in the Visual Editor, or Claude re-pulls the doc before publishing.
+
+**Package:** `Claude outputs/circular-02-import/` in this repo (untracked, as that folder always is). See its README for the conversion choices.
+- `issue.json`: Issue 2 as the draft `drafts.circular-issue-02`.
+  - Masthead: issue 2, "Haints' Cross 2026", "Stories worth passing around.", dated 2026-11-02.
+  - Feature: Judaculla Rock, with the doc's three-paragraph teaser.
+  - From the Guild (portraits): MJ Polk, Gray and Rick, each with their full piece.
+  - Around the Porch (pictures): Porch Radio (studio photo) and On the Nightstand (Thunderball cover), each with their full piece.
+  - More From the Porch: Ole Dually Girl and Life in the Fine Print. The Jean-Paul line is left out.
+  - Sign-off: MJ · Rick · Gray.
+  - Every array item has a unique key; checked by script.
+- `images/`: the two pictures, extracted from the doc. Checksums match on both machines.
+- `import-circular-02.mjs`, which:
+  - backs up every existing Circular document;
+  - stops if a published Issue 2 exists;
+  - uploads the pictures;
+  - removes superseded practice material (old `circularPiece` documents and unpublished-only issue drafts), never anything published;
+  - writes the draft and prints a summary.
+
+**Open for Rick:** the feature's byline comes from the Porch story's Authors box, which reads "primalbeet". The doc shows "By Rick". Decide in stage 3 (an optional byline override on the Feature, or change the story's Authors).
+
+**Not yet done. Follow this order:**
+1. Copy the whole `Claude outputs/circular-02-import` folder into the Studio repo's root, so the script can find Sanity's library.
+2. From the Studio root, run `npx sanity exec circular-02-import/import-circular-02.mjs --with-user-token`, using the Studio's own CLI login, not the Sanity connector. Report its full output.
+3. Move the folder back to `Claude outputs/` in the site repo, including the new `backup-before-import.json`. Confirm `git status` in the Studio repo shows nothing new. Commit nothing from this package.
+4. Run Sanity's document validation and report any errors on `drafts.circular-issue-02`. Do not publish it.
+5. Commit this PROJECT_LOG entry in the site repo and push.
+
+---
+
 ## 2026-11-02 (3) — Circular forms reworked: pieces inside their issue, then simplified (written, NOT yet deployed — handed to Claude Code)
 
 Stage 2 is deployed as Studio commit `3e7cfd9` and site commit `061587f`. Rick started entering Issue 2 and found the forms too complicated.
