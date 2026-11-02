@@ -6,13 +6,18 @@ Read this at the start of any SWG session, same as `CLAUDE.md`.
 
 ---
 
-## 2026-11-02 (9) — Circular "line under the heading" now reads exactly like the masthead tagline (written, NOT yet live)
+## 2026-11-02 (9) — Circular "line under the heading" now reads exactly like the masthead tagline (live — site `f20ad8f`, pushed and checked by Claude Code the same day)
 
 The 14pt upright version from (8) didn't look right to Rick. He asked for the line (e.g. "What we've been getting into.") to read exactly like "Stories worth passing around." under the masthead.
 - Website: `.circ-subheading` in `css/swg.css` now uses the same font, size, italic and colour as `.circ-tagline`: serif, italic, 1.3rem, muted, centred.
 - Email: `subheading()` in `js/circular-email.js` matches the email tagline: Georgia 19px italic, muted.
 
 **Not yet done:** `npm run build`, commit `css/swg.css`, `js/circular-email.js` and this log, then push. After the deploy, check that on `/circular/02/` the From the Guild line matches "Stories worth passing around." in font, size and italic, and the same on `/circular-email/02/`. The new wording "What we've been getting into." is in an unpublished draft of Issue 2, so it shows on the live page only after Issue 2 is published again.
+
+**Done, same day (`f20ad8f`).** Checked live after the deploy:
+- `/circular/02/`: "What we've been getting into." and "Stories worth passing around." are identical: Cormorant Garamond, italic, 20.8px (1.3rem), same muted colour, centred.
+- `/circular-email/02/`: the two lines are also identical: Georgia, italic, 19px, `#6e5f50`, centred.
+- The new wording was already on the live page. Issue 2 had been published again since this entry was written. The published document holds "What we've been getting into.", and no unpublished draft exists.
 
 ---
 
