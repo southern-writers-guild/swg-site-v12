@@ -6,7 +6,19 @@ Read this at the start of any SWG session, same as `CLAUDE.md`.
 
 ---
 
-## 2026-11-02 (7) — SWG Circular stage 5: the Kit hand-off and the light-paper email (written, NOT yet live — handed to Claude Code)
+## 2026-11-02 (8) — Circular "line under the heading" set to 14pt serif (written, NOT yet live)
+
+Rick asked for the Teasers and Link list "Line under the heading" (`subheading`) to be 14pt in the brand font. It was small, letter-spaced sans; it's now 14pt Cormorant Garamond (`var(--font-serif)`), muted colour, centred.
+- Website: `.circ-subheading` in `css/swg.css`.
+- Email: a new `subheading()` helper in `js/circular-email.js` sets Georgia 14pt, the email-safe stand-in for the serif.
+
+Rick's wider wish, stated alongside: this box "should be full edit", meaning the full editor rather than the one-line toolbar. That's not done yet; it's his call whether every one-line box should become a full editor.
+
+**Not yet done:** if entry (7) hasn't been carried out yet, do (7) first. Then run `npm run build`, commit `css/swg.css`, `js/circular-email.js` and this entry, and push to `main`. Then check that `/circular/02/` shows the From the Guild line in the serif at 14pt, and that `/circular-email/02/` shows the same in Georgia.
+
+---
+
+## 2026-11-02 (7) — SWG Circular stage 5: the Kit hand-off and the light-paper email (live — steps 1–4 done by Claude Code the same day; Send to Kit still off, see the update at the end of this entry)
 
 Entry (6) is done: site `0a2cc4b`, Studio `ae3e1ff`. Both issues hold editor values, and Rick published Issue 2 (`circular-issue-02`), now live at `/circular/02/`.
 
@@ -56,6 +68,18 @@ Entry (6) is done: site `0a2cc4b`, Studio `ae3e1ff`. Both issues hold editor val
    - `/circular/02/` and its five piece pages are unchanged.
 4. **The Sanity webhook:** copy `Claude outputs/circular-stage5` into the Studio root and run `npx sanity exec circular-stage5/create-kit-webhook.mjs --with-user-token`. Report its full output. Move the folder back and commit nothing from it.
 5. **Do not switch on Send to Kit.** Rick or Grace does that, which is the real test.
+
+**Update, same day — done by Claude Code, in order, using the Studio's own command-line login:**
+1. Studio: commit `738b163` pushed. Schema deployed and Studio deployed to swg-studio.sanity.studio, both reported success.
+2. Site: the build ran clean and `api/` holds 10 function files. Commit `20feb86` pushed to `main`.
+3. Verified live:
+   - `/api/circular-to-kit?check` returned `{"kitKey":"works"}`.
+   - `/circular-email/02/` shows the subject "The SWG Circular · Issue No. 02 · Haints Cross 2026" (no apostrophe in "Haints", which is how the season reads on the live issue too), the preview line "Stories worth passing around.", "Send to Kit: off", and the email on the light paper (`#f3ead8`).
+   - `/circular/02/` and all five piece pages load with the right titles, authors and text. There was no "before" copy to compare against, so "unchanged" here means they load correctly, not that they were compared line by line.
+4. The webhook script reported 0 existing webhooks, then created "SWG Circular → Kit draft" (`n3pqHo0pEu7duggz`) → `https://www.southernwritersguild.com/api/circular-to-kit`. The copied folder was removed from the Studio afterwards, and nothing from it was committed.
+5. Send to Kit was not switched on. Read back: it is off (unset) on both `circular-issue-01` and `circular-issue-02`.
+
+**Open, for Rick:** the feature story in Issue 2, "Judaculla Rock", shows the byline "By primalbeet" on the email preview. That name belongs to Rick's separate music project. Nothing was changed. It needs Rick's call.
 
 ---
 
