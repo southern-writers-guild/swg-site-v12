@@ -6,7 +6,7 @@ Read this at the start of any SWG session, same as `CLAUDE.md`.
 
 ---
 
-## 2026-11-02 (8) — Circular "line under the heading" set to 14pt serif (written, NOT yet live)
+## 2026-11-02 (8) — Circular "line under the heading" set to 14pt serif (live — site `db520dd`, pushed and checked by Claude Code the same day)
 
 Rick asked for the Teasers and Link list "Line under the heading" (`subheading`) to be 14pt in the brand font. It was small, letter-spaced sans; it's now 14pt Cormorant Garamond (`var(--font-serif)`), muted colour, centred.
 - Website: `.circ-subheading` in `css/swg.css`.
@@ -15,6 +15,12 @@ Rick asked for the Teasers and Link list "Line under the heading" (`subheading`)
 Rick's wider wish, stated alongside: this box "should be full edit", meaning the full editor rather than the one-line toolbar. That's not done yet; it's his call whether every one-line box should become a full editor.
 
 **Not yet done:** if entry (7) hasn't been carried out yet, do (7) first. Then run `npm run build`, commit `css/swg.css`, `js/circular-email.js` and this entry, and push to `main`. Then check that `/circular/02/` shows the From the Guild line in the serif at 14pt, and that `/circular-email/02/` shows the same in Georgia.
+
+**Done, same day:** entry (7) had already been carried out (`20feb86`, `a8a1a8e`). This entry's text had already been committed in `a8a1a8e`, so `db520dd` holds only the two code files. Checked live:
+- `/circular/02/`: "Here's what we've been getting into." under From the Guild is Cormorant Garamond at 18.67px (= 14pt), muted colour, centred.
+- `/circular-email/02/`: the same line is Georgia, 14pt, centred.
+
+The "full edit" wish is still open, as above.
 
 ---
 
