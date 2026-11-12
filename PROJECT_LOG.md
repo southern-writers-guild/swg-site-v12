@@ -70,23 +70,27 @@ Read this at the start of any SWG session, same as `CLAUDE.md`.
    - **Do not publish a test contributor or piece** — anything published is public. The first real one gets checked when the partners publish it.
 5. Add a "Done" line to this entry with both commit ids and what was checked.
 
+**Done 2026-11-12 (Claude Code) — LIVE.** Studio repo commit `f915447` (new `contributor` and `contributorWork` types, registered after Event; `contributorsTagline` / `contributorsEmptyMessage` as editor boxes plus plain `contributorsMetaDescription` in Site Page Copy; Presentation routes and locations, with `/contributors/work/:slug` listed ahead of `/contributors/:slug`). `sanity schema deploy` and `sanity deploy` both succeeded; `sanity schema list` shows `_.schemas.default`. (The Sanity connector lacked read permission for this account, so the type-level `get_schema` check couldn't run; the live site reading the new Site Page Copy wording back confirms the deploy.) Site repo commit `017788b`; `npm run build` passed. Site Page Copy had no draft, so the tagline and empty-message wording were set on the published document.
+- Checked live: `/contributors/` (menu highlighted, tagline from Sanity, empty message, both footer links), `/contributors/archive/` ("No contributors yet."), `/contributors/nobody/` ("Contributor not found"), `/contributors/work/` ("No contributor work yet."), `/contributors/work/nothing/` ("Piece not found"); menu reads the seven items on homepage, Events and Writers; at 768px the menu button shows and opens with all seven, no sideways scroll.
+- Not checked: Studio screens by eye (the Contributors box accepting more than one person, Contributor Work sitting after Contributor) — the types are deployed but not opened in the Studio UI. No test contributor or piece was published. Note: the Studio has no custom desk structure, so ordering follows the type list (Event, Contributor, Contributor Work).
+
 **Scope checklist** (status as of this entry):
 
 | Surface | Status |
 |---|---|
-| Contributors main page | written, untested live |
-| Contributors archive | written, untested live |
-| Each contributor's own page | written, untested live |
-| Menu on all 26 pages + new pages | written, untested live |
-| Tablet menu switch (860px) | written, tested in a local render |
-| Private preview / click-to-edit | written, untested live |
-| Contributor Work archive | written, untested live |
-| Contributor Work piece page (credit links, More from) | written, untested live |
-| "Their work" on each contributor's page | written, untested live |
-| Contributor section in Sanity | handed to Claude Code |
-| Contributor Work section in Sanity | handed to Claude Code |
-| Contributors wording in Site Page Copy | handed to Claude Code |
-| Presentation Tool locations | handed to Claude Code |
+| Contributors main page | live, checked 2026-11-12 (empty states) |
+| Contributors archive | live, checked 2026-11-12 (empty states) |
+| Each contributor's own page | live, checked 2026-11-12 (empty states) |
+| Menu on all 26 pages + new pages | live, checked 2026-11-12 (empty states) |
+| Tablet menu switch (860px) | live, checked at 768px |
+| Private preview / click-to-edit | live, checked 2026-11-12 (empty states) |
+| Contributor Work archive | live, checked 2026-11-12 (empty states) |
+| Contributor Work piece page (credit links, More from) | live, checked 2026-11-12 (empty states) |
+| "Their work" on each contributor's page | live, checked 2026-11-12 (empty states) |
+| Contributor section in Sanity | live (deployed 2026-11-12) |
+| Contributor Work section in Sanity | live (deployed 2026-11-12) |
+| Contributors wording in Site Page Copy | live (deployed 2026-11-12) |
+| Presentation Tool locations | live (deployed 2026-11-12) |
 | Homepage | not applicable (Events isn't on it) |
 
 ---
