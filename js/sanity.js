@@ -204,6 +204,139 @@
      return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })
    }
 
+   /* ── Contributors ────────────────────────────────────────────── */
+   /* Modeled on Events. People, so newest-joined first (joinedDate),
+      not soonest-first. name and shortLine are one-line editor values
+      (or plain strings): render with renderInline(), plain words with
+      plainTextOf(). bio is the full editor (renderPortableText). The
+      photo's hotspot comes back alongside its URL so cards and the
+      contributor page can keep the face in frame when cropping. */
+
+   const CONTRIBUTOR_CARD_FIELDS = `_id, name, shortLine, joinedDate, featured,
+        "slug": slug.current,
+        "photoUrl": photo.asset->url,
+        "photoHotspot": photo.hotspot`
+
+   export async function fetchContributors(limit = 9) {
+     return sanityFetch(
+       `*[_type == "contributor" && (featured == true || !defined(featured))] | order(joinedDate desc) [0...${Number(limit)}] {${CONTRIBUTOR_CARD_FIELDS}}`
+     )
+   }
+
+   export async function fetchAllContributors() {
+     return sanityFetch(
+       `*[_type == "contributor"] | order(joinedDate desc) {${CONTRIBUTOR_CARD_FIELDS}}`
+     )
+   }
+
+   export async function fetchContributorBySlug(slug) {
+     const safe = String(slug).replace(/"/g, '\\"')
+     return sanityFetch(
+       `*[_type == "contributor" && slug.current == "${safe}"][0] {${CONTRIBUTOR_CARD_FIELDS}, bio, link,
+          "gallery": gallery[]{ "url": asset->url, hotspot }}`
+     )
+   }
+
+   /* Sanity image URL at a given width, plus a CSS object-position that
+      keeps the hotspot (usually the face) in view when the frame crops. */
+   export function contributorPhoto(url, hotspot, width = 800) {
+     if (!url) return { src: '', position: 'center 25%' }
+     const sep = url.includes('?') ? '&' : '?'
+     const position = hotspot && typeof hotspot.x === 'number'
+       ? `${Math.round(hotspot.x * 100)}% ${Math.round(hotspot.y * 100)}%`
+       : 'center 25%'
+     return { src: `${url}${sep}w=${width}&auto=format`, position }
+   }
+
+   export function renderContributorCard(person) {
+     const { src, position } = contributorPhoto(person.photoUrl, person.photoHotspot, 800)
+     const nameText = plainTextOf(person.name)
+     const img = src
+       ? `<img src="${esc(src)}" alt="${esc(nameText)}" style="width:100%;aspect-ratio:4/5;object-fit:cover;object-position:${esc(position)};display:block;margin-bottom:0.75rem;">`
+       : `<div style="aspect-ratio:4/5;background:var(--bg-3);margin-bottom:0.75rem;"></div>`
+     const href = person.slug ? `/contributors/${person.slug}/` : '#'
+     const line = renderInline(person.shortLine)
+     return `
+       <a href="${esc(href)}" class="card" style="display:block;text-decoration:none;">
+         ${img}
+         ${line ? `<span class="card-label">${line}</span>` : ''}
+         <h2 class="card-title card-title--sm">${renderInline(person.name)}</h2>
+       </a>`
+   }
+
+   /* ── Contributor Work ────────────────────────────────────────── */
+   /* Pieces by contributors, modeled on Porch stories but kept off the
+      Porch entirely. Each piece points at one or more contributors
+      (contributorWork.contributors, references), so the credit line, the
+      "Their work" list on each contributor's page and the archive at
+      /contributors/work/ all follow from that one choice in Sanity.
+      title and excerpt may be plain strings or editor values; both are
+      read through renderInline()/plainTextOf(). */
+
+   const WORK_CARD_FIELDS = `_id, title, excerpt, publishedAt, thumbnail,
+        "slug": slug.current,
+        "contributors": contributors[]->{ _id, name, "slug": slug.current }`
+
+   export async function fetchAllContributorWork() {
+     return sanityFetch(
+       `*[_type == "contributorWork"] | order(publishedAt desc) {${WORK_CARD_FIELDS}}`
+     )
+   }
+
+   export async function fetchContributorWorkBySlug(slug) {
+     return sanityFetch(
+       `*[_type == "contributorWork" && slug.current == $slug][0] {${WORK_CARD_FIELDS}, body, layout}`,
+       { slug: String(slug) }
+     )
+   }
+
+   /* Every piece crediting one contributor, newest first. excludeId keeps
+      the piece being read out of its own "More from" list. */
+   export async function fetchWorkByContributor(contributorId, excludeId = '') {
+     return sanityFetch(
+       `*[_type == "contributorWork" && $id in contributors[]._ref && _id != $exclude] | order(publishedAt desc) {${WORK_CARD_FIELDS}}`,
+       { id: String(contributorId), exclude: String(excludeId) }
+     )
+   }
+
+   /* "Ada Lee", "Ada Lee & Sam Ray", "Ada Lee, Sam Ray & Bo Day".
+      linked = true makes each name a link to that contributor's page. */
+   export function contributorCredit(list, linked = false) {
+     const people = (Array.isArray(list) ? list : []).filter(p => p && p.name)
+     const parts = people.map(p => {
+       const nameHtml = linked ? renderInline(p.name) : esc(plainTextOf(p.name))
+       return linked && p.slug
+         ? `<a href="/contributors/${esc(p.slug)}/" style="color:inherit;text-decoration:underline;text-underline-offset:3px;">${nameHtml}</a>`
+         : nameHtml
+     })
+     if (parts.length <= 1) return parts.join('')
+     return parts.slice(0, -1).join(', ') + ' &amp; ' + parts[parts.length - 1]
+   }
+
+   export function renderWorkCard(work) {
+     const thumb = thumbSrc(work)
+     const pos = thumbPosition(work)
+     const titleText = plainTextOf(work.title)
+     const excerptHtml = renderInline(work.excerpt)
+     // Same treatment as Porch cards: tall covers shown whole, not cropped.
+     const img = thumb
+       ? `<div style="aspect-ratio:16/9;background:var(--bg-3);margin-bottom:0.75rem;overflow:hidden;">
+            <img src="${esc(thumb)}" alt="${esc(titleText)}" style="width:100%;height:100%;object-fit:contain;object-position:${pos};display:block;">
+          </div>`
+       : `<div style="aspect-ratio:16/9;background:var(--bg-3);display:flex;align-items:center;justify-content:center;margin-bottom:0.75rem;">
+            <span style="font-family:var(--font-serif);font-style:italic;color:var(--text-faint);font-size:0.95rem;text-align:center;padding:1rem;">${esc(plainTextOf(work.excerpt) || titleText)}</span>
+          </div>`
+     const href = work.slug ? `/contributors/work/${work.slug}/` : '#'
+     const label = [esc(formatDate(work.publishedAt)), contributorCredit(work.contributors)].filter(Boolean).join(' &nbsp;·&nbsp; ')
+     return `
+       <a href="${esc(href)}" class="card" style="display:block;text-decoration:none;">
+         ${img}
+         ${label ? `<span class="card-label">${label}</span>` : ''}
+         <h2 class="card-title card-title--sm">${renderInline(work.title)}</h2>
+         ${excerptHtml ? `<p class="card-body" style="font-size:0.9rem;">${excerptHtml}</p>` : ''}
+       </a>`
+   }
+
    /* ── Homepage: Right Now ────────────────────────────────────── */
    /* Always three posts (Porch stories and Guild Videos together).
       1. The newest items with "Show on homepage" ON come first — if

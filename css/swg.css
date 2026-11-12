@@ -811,6 +811,28 @@ ul, ol { list-style: none; }
     .hero-two-col { grid-template-columns: 1fr !important; }
   }
   
+  /* Seven menu items (Contributors added 2026-11-12) no longer fit on one
+     line below ~840px, and the second line pushed the page sideways on
+     tablets. The menu button now takes over below 860px instead of 600px.
+     Same rules as the phone block below, which still repeats them. */
+  @media (max-width: 860px) {
+    .nav-toggle { display: flex; }
+    .nav-links { display: none; }
+    .nav-links.open {
+      display: flex;
+      flex-direction: column;
+      position: absolute;
+      top: var(--nav-h);
+      left: 0;
+      right: 0;
+      background: var(--bg);
+      border-bottom: 0.5px solid var(--border);
+      padding: 1.25rem var(--sp-md);
+      gap: 1.25rem;
+      z-index: 99;
+    }
+  }
+
   @media (max-width: 600px) {
     :root { --sp-md: 1.25rem; }
     .grid--3, .grid--2, .grid--writers, .grid--circular { grid-template-columns: 1fr; }

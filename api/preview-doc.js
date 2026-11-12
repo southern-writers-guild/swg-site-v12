@@ -36,6 +36,19 @@ const QUERIES = {
   event: `*[_type == "event" && slug.current == $slug][0]`,
   guildVideo: `*[_type == "guildVideo" && slug.current == $slug][0]`,
   writer: `*[_type == "writer" && slug.current == $slug][0] {${WRITER_FIELDS}}`,
+  // Same fields js/sanity.js fetchContributorBySlug() returns, so the
+  // contributor page renders a draft exactly like the published version.
+  contributor: `*[_type == "contributor" && slug.current == $slug][0] {
+        _id, name, shortLine, joinedDate, featured, bio, link,
+        "slug": slug.current,
+        "photoUrl": photo.asset->url,
+        "photoHotspot": photo.hotspot,
+        "gallery": gallery[]{ "url": asset->url, hotspot }}`,
+  // Same fields js/sanity.js fetchContributorWorkBySlug() returns.
+  contributorWork: `*[_type == "contributorWork" && slug.current == $slug][0] {
+        _id, title, excerpt, publishedAt, thumbnail, body, layout,
+        "slug": slug.current,
+        "contributors": contributors[]->{ _id, name, "slug": slug.current }}`,
   // A Circular issue is addressed by its number ("02"), passed as slug;
   // the shared query (js/circular-query.js) reads it as $issue.
   circularIssue: CIRCULAR_ISSUE_BY_ADDRESS,

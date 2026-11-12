@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contributors — Southern Writers Guild</title>
+  <meta name="description" content="The writers and artists who contribute to the Southern Writers Guild.">
+  <link rel="stylesheet" href="../css/swg.css">
+  <style>
+    .contributors-header {
+      padding: 48px 60px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+    .contributors-label {
+      font-size: 14px;
+      letter-spacing: 0.22em;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+    .contributors-tagline {
+      font-family: var(--serif, 'Cormorant Garamond', Georgia, serif);
+      font-size: 15px;
+      font-style: italic;
+      font-weight: 400;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+    .contributors-divider { border: none; border-top: 1px solid var(--border); margin: 0; }
+    .contributors-grid-wrap { padding: 44px 60px 0; }
+    #contributors-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+    .contributors-footer {
+      padding: 40px 60px 56px;
+      display: flex;
+      justify-content: flex-end;
+      gap: 32px;
+      flex-wrap: wrap;
+    }
+    .archive-link {
+      font-size: 14px;
+      color: var(--accent);
+      letter-spacing: 0.12em;
+      text-decoration: none;
+      text-transform: uppercase;
+      transition: color 0.2s;
+      white-space: nowrap;
+    }
+    .archive-link:hover { color: var(--accent-light); }
+    @media (max-width: 768px) {
+      .contributors-header { padding: 36px 24px 12px; flex-direction: column; align-items: flex-start; gap: 16px; }
+      .contributors-grid-wrap { padding: 32px 24px 0; }
+      #contributors-grid { grid-template-columns: repeat(2, 1fr); }
+      .contributors-footer { padding: 32px 24px 40px; }
+    }
+    /* Portrait photos run tall: two across on tablets, one on phones. */
+    @media (max-width: 480px) {
+      #contributors-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="site-nav">
+    <div class="nav-inner">
+      <a href="/" class="nav-logo-link">
+        <img src="../assets/images/swg-logo.png" alt="Southern Writers Guild" class="nav-logo">
+      </a>
+      <button class="nav-toggle" aria-label="Open menu" aria-expanded="false"><span></span><span></span><span></span></button>
+      <ul class="nav-links">
+        <li><a href="/the-porch/">The Porch</a></li>
+        <li><a href="/the-work/">The Work</a></li>
+        <li><a href="/events/">Events</a></li>
+        <li><a href="/the-house/">The House</a></li>
+        <li><a href="/writers/">Writers</a></li>
+        <li><a href="/contributors/" class="active">Contributors</a></li>
+        <li class="nav-join"><a href="/join/">Join</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="contributors-header">
+    <div>
+      <p class="contributors-label">Contributors</p>
+      <p class="contributors-tagline" id="contributors-tagline">The writers the Guild endorses</p>
+    </div>
+  </div>
+
+  <hr class="contributors-divider">
+
+  <div class="contributors-grid-wrap">
+    <div id="contributors-grid">
+      <!-- Populated by Sanity -->
+    </div>
+  </div>
+
+  <div class="contributors-footer">
+    <a href="/contributors/work/" class="archive-link">Contributor work →</a>
+    <a href="/contributors/archive/" class="archive-link">Every contributor →</a>
+  </div>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <span class="footer-text">© 2026 Southern Writers Guild</span>
+      <img src="/assets/images/icon-peacock.png" alt="Jean-Paul, the Guild's peacock" class="footer-peacock">
+    </div>
+  </footer>
+
+  <script type="module">
+    import { fetchContributors, renderContributorCard, renderInline, plainTextOf, esc, showLoading, showError, fetchSitePageCopy } from '../js/sanity.js'
+    const grid = document.getElementById('contributors-grid')
+    // Shown until the first contributor is published; editable in Sanity
+    // (Site Page Copy → Contributors: empty message).
+    let emptyMessage = 'The porch is being swept. Contributors arrive soon.'
+    let contributorsLoaded = null
+    showLoading(grid)
+    fetchContributors(9)
+      .then(people => {
+        contributorsLoaded = people || []
+        if (!contributorsLoaded.length) {
+          showError(grid, esc(emptyMessage))
+          return
+        }
+        grid.innerHTML = contributorsLoaded.map(renderContributorCard).join('')
+      })
+      .catch(() => showError(grid, 'Contributors unavailable.'))
+
+    // Same mechanism as every other preview-aware page — see
+    // the-porch/story/index.html for the full explanation.
+    function isPreviewing() {
+      return document.cookie.split('; ').some(c => c.indexOf('swg_preview_active=') === 0)
+    }
+
+    function fetchCopy() {
+      if (!isPreviewing()) return fetchSitePageCopy()
+      return fetch('/api/preview-singleton?type=sitePageCopy')
+        .then(res => {
+          if (!res.ok) throw new Error('Preview fetch failed')
+          return res.json()
+        })
+        .then(data => data.result)
+        .catch(() => fetchSitePageCopy())
+    }
+
+    fetchCopy()
+      .then(copy => {
+        if (!copy) return
+        const taglineEl = document.getElementById('contributors-tagline')
+        const tagline = renderInline(copy.contributorsTagline)
+        if (taglineEl && tagline) taglineEl.innerHTML = tagline
+        const empty = plainTextOf(copy.contributorsEmptyMessage)
+        if (empty) {
+          emptyMessage = empty
+          if (contributorsLoaded && !contributorsLoaded.length) showError(grid, esc(emptyMessage))
+        }
+        if (copy.contributorsMetaDescription) {
+          const meta = document.querySelector('meta[name="description"]')
+          if (meta) meta.setAttribute('content', plainTextOf(copy.contributorsMetaDescription))
+        }
+      })
+      .catch(() => {})
+  </script>
+
+  <script src="../js/nav.js"></script>
+</body>
+</html>

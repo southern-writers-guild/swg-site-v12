@@ -27,6 +27,22 @@
       "destination": "/events/event/index.html"
     },
     {
+      "source": "/contributors/work/:slug",
+      "destination": "/contributors/work/piece/index.html"
+    },
+    {
+      "source": "/contributors/work/:slug/",
+      "destination": "/contributors/work/piece/index.html"
+    },
+    {
+      "source": "/contributors/:slug",
+      "destination": "/contributors/contributor/index.html"
+    },
+    {
+      "source": "/contributors/:slug/",
+      "destination": "/contributors/contributor/index.html"
+    },
+    {
       "source": "/the-work/videos/:slug",
       "destination": "/the-work/videos/video/index.html"
     },

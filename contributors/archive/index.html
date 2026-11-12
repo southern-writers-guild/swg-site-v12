@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>All Contributors — Southern Writers Guild</title>
+  <link rel="stylesheet" href="../../css/swg.css">
+</head>
+<body>
+
+  <nav class="site-nav">
+    <div class="nav-inner">
+      <a href="/" class="nav-logo-link">
+        <img src="../../assets/images/swg-logo.png" alt="Southern Writers Guild" class="nav-logo">
+      </a>
+      <button class="nav-toggle" aria-label="Open menu" aria-expanded="false"><span></span><span></span><span></span></button>
+      <ul class="nav-links">
+        <li><a href="/the-porch/">The Porch</a></li>
+        <li><a href="/the-work/">The Work</a></li>
+        <li><a href="/events/">Events</a></li>
+        <li><a href="/the-house/">The House</a></li>
+        <li><a href="/writers/">Writers</a></li>
+        <li><a href="/contributors/" class="active">Contributors</a></li>
+        <li class="nav-join"><a href="/join/">Join</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <section class="hero" style="padding-bottom:var(--sp-md);">
+    <div class="container">
+      <span class="hero-eyebrow">Contributors</span>
+      <h1 class="hero-headline" style="font-size:clamp(1.8rem,3.5vw,2.8rem);">Every contributor.</h1>
+      <p class="hero-sub">Newest first. <a href="/contributors/" class="btn btn--ghost" style="font-size:0.62rem;margin-left:1rem;">← Back to Contributors</a></p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="grid grid--3" id="contributors-archive-grid"></div>
+    </div>
+  </section>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <span class="footer-text">© 2026 Southern Writers Guild</span>
+      <img src="/assets/images/icon-peacock.png" alt="Jean-Paul, the Guild's peacock" class="footer-peacock">
+    </div>
+  </footer>
+
+  <script type="module">
+    import { fetchAllContributors, renderContributorCard, showLoading, showError } from '../../js/sanity.js'
+    const grid = document.getElementById('contributors-archive-grid')
+    showLoading(grid)
+    fetchAllContributors()
+      .then(people => {
+        if (!people || !people.length) { showError(grid, 'No contributors yet.'); return }
+        grid.innerHTML = people.map(renderContributorCard).join('')
+      })
+      .catch(() => showError(grid, 'Archive unavailable.'))
+  </script>
+
+  <script src="../../js/nav.js"></script>
+</body>
+</html>

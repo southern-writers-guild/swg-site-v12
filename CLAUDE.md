@@ -143,7 +143,7 @@ Still live, ~243 subscribers, nearly all imported by the founders from prior aud
 4. **House, Writers, and Join pages** — substantially completed 2026-08-03. House: beliefs rewritten, "What Is a Southern Writer" section added, contact consolidated to one address, manifesto removed. Writers: circular photo treatment, updated headline and copy, dead links removed. Join: new header copy and retro badge image, email capture wired to Kit, dead links removed. Nothing outstanding identified this session.
 5. **Storefront** — dormant on the technical/build side for now, but Grace is actively developing products for it, so this is past the discussion stage. Next session priority: audit how much of the site is Sanity-managed vs. hardcoded, and extend Sanity's reach wherever it makes sense (writers, work, house content already flagged elsewhere in this doc). Do not assume this is the same thing as the existing `/shop/` page unless told so explicitly.
 
-Nav currently reads: THE PORCH · THE WORK · EVENTS · THE HOUSE · WRITERS · JOIN. Events was added 2026-08-02. Every item is evocative rather than descriptive; a first-time visitor can't tell what any of them contain. Adding a seventh is a real navigability risk. Raise it before adding.
+Nav currently reads: THE PORCH · THE WORK · EVENTS · THE HOUSE · WRITERS · CONTRIBUTORS · JOIN. Events was added 2026-08-02; Contributors 2026-11-12, Rick's explicit call. Every item except Contributors is evocative rather than descriptive; a first-time visitor can't tell what any of them contain. Adding an eighth is a real navigability risk. Raise it before adding. Seven items need the menu button below 860px wide (see `css/swg.css`); an eighth would push that breakpoint wider again.
 
 ## Content management
 

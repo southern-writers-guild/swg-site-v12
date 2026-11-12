@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contributor — Southern Writers Guild</title>
+  <link rel="stylesheet" href="/css/swg.css">
+  <style>
+    .contributor-gallery { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin: var(--sp-md) 0; }
+    .contributor-gallery img { width: 100%; height: auto; display: block; }
+  </style>
+</head>
+<body>
+
+  <nav class="site-nav">
+    <div class="nav-inner">
+      <a href="/" class="nav-logo-link">
+        <img src="/assets/images/swg-logo.png" alt="Southern Writers Guild" class="nav-logo">
+      </a>
+      <button class="nav-toggle" aria-label="Open menu" aria-expanded="false"><span></span><span></span><span></span></button>
+      <ul class="nav-links">
+        <li><a href="/the-porch/">The Porch</a></li>
+        <li><a href="/the-work/">The Work</a></li>
+        <li><a href="/events/">Events</a></li>
+        <li><a href="/the-house/">The House</a></li>
+        <li><a href="/writers/">Writers</a></li>
+        <li><a href="/contributors/" class="active">Contributors</a></li>
+        <li class="nav-join"><a href="/join/">Join</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <section class="hero" style="padding-bottom:var(--sp-sm);">
+    <div class="container" style="max-width:var(--content-w);">
+      <span class="hero-eyebrow">Contributors</span>
+      <h1 id="contributor-name" class="hero-headline" style="font-size:clamp(1.8rem,3.5vw,2.6rem);">Loading…</h1>
+      <p id="contributor-line" class="hero-sub" style="font-family:var(--font-ui);font-size:0.8rem;letter-spacing:0.04em;"></p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container" style="max-width:var(--content-w);">
+      <div id="contributor-photo"></div>
+      <div id="contributor-bio" class="prose"></div>
+      <div id="contributor-link"></div>
+      <div id="contributor-gallery" class="contributor-gallery"></div>
+      <div id="contributor-work"></div>
+      <p style="margin-top:var(--sp-lg);">
+        <a href="/contributors/" style="font-size:14px;color:var(--accent);letter-spacing:0.12em;text-decoration:none;text-transform:uppercase;">← Back to Contributors</a>
+      </p>
+    </div>
+  </section>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <span class="footer-text">© 2026 Southern Writers Guild</span>
+      <img src="/assets/images/icon-peacock.png" alt="Jean-Paul, the Guild's peacock" class="footer-peacock">
+    </div>
+  </footer>
+
+  <script type="module">
+    import { fetchContributorBySlug, fetchWorkByContributor, renderWorkCard, renderPortableText, renderInline, plainTextOf, contributorPhoto, esc, stegaClean } from '/js/sanity.js'
+
+    const nameEl = document.getElementById('contributor-name')
+    const lineEl = document.getElementById('contributor-line')
+    const photoEl = document.getElementById('contributor-photo')
+    const bioEl = document.getElementById('contributor-bio')
+    const linkEl = document.getElementById('contributor-link')
+    const galleryEl = document.getElementById('contributor-gallery')
+    const workEl = document.getElementById('contributor-work')
+
+    const parts = window.location.pathname.split('/').filter(Boolean)
+    const slug = parts[parts.length - 1]
+
+    function notFound() {
+      nameEl.textContent = 'Contributor not found'
+      lineEl.textContent = ''
+      bioEl.innerHTML = '<p>We couldn’t find that contributor. They may have moved.</p>'
+    }
+
+    // Same preview mechanism as the event and Porch story pages: the
+    // non-secret hint cookie decides whether to try the draft route;
+    // /api/preview-doc checks the real credential server-side.
+    function isPreviewing() {
+      return document.cookie.split('; ').some(c => c.indexOf('swg_preview_active=') === 0)
+    }
+
+    function fetchContributor(slug) {
+      if (!isPreviewing()) return fetchContributorBySlug(slug)
+      return fetch(`/api/preview-doc?type=contributor&slug=${encodeURIComponent(slug)}`)
+        .then(res => {
+          if (!res.ok) throw new Error('Preview fetch failed')
+          return res.json()
+        })
+        .then(data => data.result)
+        .catch(() => fetchContributorBySlug(slug))
+    }
+
+    function renderContributor(person) {
+      if (!person) { notFound(); return }
+
+      // Plain words (stega stripped) for <title> and alt text; the visible
+      // name and line stay as rendered so click-to-edit can find them.
+      const nameText = stegaClean(plainTextOf(person.name))
+      document.title = `${nameText} — Contributors — Southern Writers Guild`
+      nameEl.innerHTML = renderInline(person.name)
+      lineEl.innerHTML = renderInline(person.shortLine)
+
+      const photo = contributorPhoto(stegaClean(person.photoUrl || ''), person.photoHotspot, 1200)
+      if (photo.src) {
+        photoEl.innerHTML = `<img src="${esc(photo.src)}" alt="${esc(nameText)}" style="width:100%;max-width:520px;height:auto;display:block;margin:var(--sp-md) 0;">`
+      }
+
+      if (person.bio && person.bio.length) {
+        bioEl.innerHTML = renderPortableText(person.bio)
+      }
+
+      const link = person.link || {}
+      const href = stegaClean(link.url || '')
+      if (href) {
+        const label = renderInline(link.label) || 'More of their work →'
+        linkEl.innerHTML = `<a href="${esc(href)}" target="_blank" rel="noopener" class="btn btn--primary" style="margin-top:0.5rem;">${label}</a>`
+      }
+
+      if (Array.isArray(person.gallery) && person.gallery.length) {
+        galleryEl.innerHTML = person.gallery.map((img, i) => {
+          const g = contributorPhoto(stegaClean((img && img.url) || ''), img && img.hotspot, 900)
+          return g.src ? `<img src="${esc(g.src)}" alt="${esc(nameText)} — image ${i + 1}">` : ''
+        }).join('')
+      }
+
+      // Every Contributor Work piece that credits this person, newest
+      // first — filled in by itself from each piece's Contributors box.
+      // A draft being previewed has a "drafts." id; pieces point at the
+      // published one.
+      const personId = String(person._id || '').replace(/^drafts\./, '')
+      if (personId) {
+        fetchWorkByContributor(personId)
+          .then(list => {
+            if (!list || !list.length) return
+            workEl.innerHTML = `
+              <h2 class="card-title" style="margin-top:var(--sp-lg);margin-bottom:var(--sp-sm);">Their work</h2>
+              <div class="grid grid--3">${list.map(renderWorkCard).join('')}</div>`
+          })
+          .catch(() => {})
+      }
+    }
+
+    // Click-to-edit is bootstrapped from js/nav.js on every page.
+    if (!slug) {
+      notFound()
+    } else {
+      fetchContributor(slug)
+        .then(renderContributor)
+        .catch(() => {
+          nameEl.textContent = 'Contributor unavailable'
+          lineEl.textContent = ''
+          bioEl.innerHTML = '<p>Something went wrong loading this contributor.</p>'
+        })
+    }
+  </script>
+
+  <script src="/js/nav.js"></script>
+</body>
+</html>

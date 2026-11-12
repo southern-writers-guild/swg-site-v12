@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contributor Work — Southern Writers Guild</title>
+  <link rel="stylesheet" href="/css/swg.css">
+</head>
+<body>
+
+  <nav class="site-nav">
+    <div class="nav-inner">
+      <a href="/" class="nav-logo-link">
+        <img src="/assets/images/swg-logo.png" alt="Southern Writers Guild" class="nav-logo">
+      </a>
+      <button class="nav-toggle" aria-label="Open menu" aria-expanded="false"><span></span><span></span><span></span></button>
+      <ul class="nav-links">
+        <li><a href="/the-porch/">The Porch</a></li>
+        <li><a href="/the-work/">The Work</a></li>
+        <li><a href="/events/">Events</a></li>
+        <li><a href="/the-house/">The House</a></li>
+        <li><a href="/writers/">Writers</a></li>
+        <li><a href="/contributors/" class="active">Contributors</a></li>
+        <li class="nav-join"><a href="/join/">Join</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <section class="hero" style="padding-bottom:var(--sp-sm);">
+    <div class="container" style="max-width:var(--content-w);">
+      <span class="hero-eyebrow">Contributor Work</span>
+      <h1 id="work-title" class="hero-headline" style="font-size:clamp(1.8rem,3.5vw,2.6rem);">Loading…</h1>
+      <p id="work-meta" class="hero-sub" style="font-family:var(--font-ui);font-size:0.8rem;letter-spacing:0.04em;"></p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container" style="max-width:var(--content-w);">
+      <div id="work-thumb"></div>
+      <div id="work-body" class="prose"></div>
+      <div id="work-more"></div>
+      <p style="margin-top:var(--sp-lg);">
+        <a href="/contributors/work/" style="font-size:14px;color:var(--accent);letter-spacing:0.12em;text-decoration:none;text-transform:uppercase;">← All contributor work</a>
+      </p>
+    </div>
+  </section>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <span class="footer-text">© 2026 Southern Writers Guild</span>
+      <img src="/assets/images/icon-peacock.png" alt="Jean-Paul, the Guild's peacock" class="footer-peacock">
+    </div>
+  </footer>
+
+  <script type="module">
+    import { fetchContributorWorkBySlug, fetchWorkByContributor, renderWorkCard, contributorCredit, renderPortableText, renderInline, plainTextOf, formatDate, thumbSrc, esc, stegaClean } from '/js/sanity.js'
+
+    const titleEl = document.getElementById('work-title')
+    const metaEl = document.getElementById('work-meta')
+    const thumbEl = document.getElementById('work-thumb')
+    const bodyEl = document.getElementById('work-body')
+    const moreEl = document.getElementById('work-more')
+
+    const parts = window.location.pathname.split('/').filter(Boolean)
+    const slug = parts[parts.length - 1]
+
+    function notFound() {
+      titleEl.textContent = 'Piece not found'
+      metaEl.textContent = ''
+      bodyEl.innerHTML = '<p>We couldn’t find that piece. It may have moved.</p>'
+    }
+
+    // Same preview mechanism as the Porch story page: the hint cookie
+    // decides whether to try the draft route; /api/preview-doc checks the
+    // real credential server-side.
+    function isPreviewing() {
+      return document.cookie.split('; ').some(c => c.indexOf('swg_preview_active=') === 0)
+    }
+
+    function fetchWork(slug) {
+      if (!isPreviewing()) return fetchContributorWorkBySlug(slug)
+      return fetch(`/api/preview-doc?type=contributorWork&slug=${encodeURIComponent(slug)}`)
+        .then(res => {
+          if (!res.ok) throw new Error('Preview fetch failed')
+          return res.json()
+        })
+        .then(data => data.result)
+        .catch(() => fetchContributorWorkBySlug(slug))
+    }
+
+    function renderWork(work) {
+      if (!work) { notFound(); return }
+
+      const titleText = stegaClean(plainTextOf(work.title))
+      document.title = `${titleText} — Contributor Work — Southern Writers Guild`
+      titleEl.innerHTML = renderInline(work.title)
+
+      // Credit line: date · names, each name linking to that contributor's page.
+      const credit = contributorCredit(work.contributors, true)
+      metaEl.innerHTML = [esc(formatDate(stegaClean(work.publishedAt || ''))), credit ? `by ${credit}` : ''].filter(Boolean).join('  ·  ')
+
+      const thumb = thumbSrc(work, 1200)
+      if (thumb) {
+        thumbEl.innerHTML = `<img src="${esc(stegaClean(thumb))}" alt="${esc(titleText)}" style="width:100%;height:auto;display:block;margin:var(--sp-md) 0;">`
+      }
+
+      // Same per-piece spacing choice as Porch stories (rules in
+      // css/swg.css under .story-layout); unset = standard spacing.
+      const layout = stegaClean(work.layout || '')
+      if (layout === 'book' || layout === 'gaps') bodyEl.classList.add('story-layout', 'layout-' + layout)
+
+      if (work.body && work.body.length) {
+        bodyEl.innerHTML = renderPortableText(work.body)
+      } else if (work.excerpt) {
+        bodyEl.innerHTML = `<p>${renderInline(work.excerpt)}</p>`
+      }
+
+      renderMoreFrom(work)
+    }
+
+    // "More from [name]" for each credited contributor who has other pieces.
+    function renderMoreFrom(work) {
+      const people = (work.contributors || []).filter(p => p && p._id)
+      const ownId = String(work._id || '').replace(/^drafts\./, '')
+      Promise.all(people.map(p => fetchWorkByContributor(p._id, ownId).then(list => ({ p, list })).catch(() => ({ p, list: [] }))))
+        .then(results => {
+          moreEl.innerHTML = results.filter(r => r.list && r.list.length).map(({ p, list }) => `
+            <h2 class="card-title" style="margin-top:var(--sp-lg);margin-bottom:var(--sp-sm);">More from ${p.slug ? `<a href="/contributors/${esc(p.slug)}/" style="color:inherit;">${esc(plainTextOf(p.name))}</a>` : esc(plainTextOf(p.name))}</h2>
+            <div class="grid grid--3">${list.slice(0, 3).map(renderWorkCard).join('')}</div>`).join('')
+        })
+    }
+
+    // Click-to-edit is bootstrapped from js/nav.js on every page.
+    if (!slug) {
+      notFound()
+    } else {
+      fetchWork(slug)
+        .then(renderWork)
+        .catch(() => {
+          titleEl.textContent = 'Piece unavailable'
+          metaEl.textContent = ''
+          bodyEl.innerHTML = '<p>Something went wrong loading this piece.</p>'
+        })
+    }
+  </script>
+
+  <script src="/js/nav.js"></script>
+</body>
+</html>

@@ -12,6 +12,13 @@ const DATASET = 'production';
 const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const PORCH_PATH_PATTERN = /^\/the-porch\/[a-z0-9]+(?:-[a-z0-9]+)*\/?$/;
 const EVENT_PATH_PATTERN = /^\/events\/[a-z0-9]+(?:-[a-z0-9]+)*\/?$/;
+// Contributors: the listing, the archive (matches the slug pattern) and
+// each contributor's own page.
+const CONTRIBUTORS_ROOT_PATH_PATTERN = /^\/contributors\/?$/;
+const CONTRIBUTOR_PATH_PATTERN = /^\/contributors\/[a-z0-9]+(?:-[a-z0-9]+)*\/?$/;
+// Contributor Work: /contributors/work/ is covered by the pattern above;
+// each piece lives one level deeper.
+const CONTRIBUTOR_WORK_PATH_PATTERN = /^\/contributors\/work\/[a-z0-9]+(?:-[a-z0-9]+)*\/?$/;
 // guildVideo and featuredFiction both have a required slug and their own
 // individual page now; the shared listing paths below stay fixed rather
 // than slug patterns since they're not per-document. Trailing slash is
@@ -59,6 +66,9 @@ function isAllowedRedirectPath(path) {
     PORCH_ROOT_PATH_PATTERN.test(path) ||
     EVENT_PATH_PATTERN.test(path) ||
     EVENTS_ROOT_PATH_PATTERN.test(path) ||
+    CONTRIBUTORS_ROOT_PATH_PATTERN.test(path) ||
+    CONTRIBUTOR_PATH_PATTERN.test(path) ||
+    CONTRIBUTOR_WORK_PATH_PATTERN.test(path) ||
     FEATURED_PATH_PATTERN.test(path) ||
     FEATURED_ARCHIVE_PATH_PATTERN.test(path) ||
     FEATURED_BOOK_PATH_PATTERN.test(path) ||
@@ -110,6 +120,22 @@ function resolveManualRedirect(req, secret) {
     const slug = req.query && req.query.slug;
     if (typeof slug !== 'string' || !SLUG_PATTERN.test(slug)) return null;
     return type === 'event' ? `/events/${slug}/` : `/the-porch/${slug}/`;
+  }
+  if (type === 'contributor') {
+    const slug = req.query && req.query.slug;
+    if (typeof slug === 'string' && slug) {
+      if (!SLUG_PATTERN.test(slug)) return null;
+      return `/contributors/${slug}/`;
+    }
+    return '/contributors/';
+  }
+  if (type === 'contributorWork') {
+    const slug = req.query && req.query.slug;
+    if (typeof slug === 'string' && slug) {
+      if (!SLUG_PATTERN.test(slug)) return null;
+      return `/contributors/work/${slug}/`;
+    }
+    return '/contributors/work/';
   }
   if (type === 'guildVideo' || type === 'writer' || type === 'featuredFiction') {
     // All three types have an optional slug: with one, resolve to that

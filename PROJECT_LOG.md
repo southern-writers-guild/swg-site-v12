@@ -6,6 +6,101 @@ Read this at the start of any SWG session, same as `CLAUDE.md`.
 
 ---
 
+## 2026-11-12 — Contributors page + Contributor Work: website side written; Sanity side + deploy HANDED TO CLAUDE CODE (NOT yet live)
+
+**What Rick decided (2026-11-12):** after talking with the group, the Guild is adding a **Contributors** page, modeled on Events, archive and all. Contributors arrive one at a time (1, then 2, then 3...), eventually well past 6, so the archive is built now. **It goes in the top menu, as its own page — Rick's explicit call** (this settles the "raise a seventh menu item first" note in CLAUDE.md; that note can now say seven). Rick approved these boxes for each contributor: name, photo, short line under the name, bio, date they joined (sets the order, newest first), link to their site or book (optional), extra pictures (optional), "Show on the main Contributors page" switch.
+
+**Website side — written by Cowork directly in this repo (uncommitted):**
+- New pages: `contributors/index.html` (heading line, up to 9 cards, "Every contributor →"), `contributors/archive/index.html` (everyone, newest first), `contributors/contributor/index.html` (one person: name, short line, photo, bio, link button, extra pictures, back link).
+  - Empty state until the first contributor is published: "The porch is being swept. Contributors arrive soon." (editable in Sanity, see below).
+  - Cards use a 4:5 portrait crop that follows the photo's hotspot (keeps the face in frame). Main page: 3 across, 2 on tablets, 1 on phones.
+- `js/sanity.js`: `fetchContributors(9)` (switch on or unset, newest `joinedDate` first), `fetchAllContributors()`, `fetchContributorBySlug()`, `contributorPhoto()`, `renderContributorCard()`. Name, short line and link wording are read with `renderInline()` / `plainTextOf()`, so they work whether the box holds editor text or a plain string.
+- Private preview / click-to-edit: `api/preview-doc.js` gains a `contributor` query (same fields as the published fetch); `api/preview.js` allows `/contributors/` and `/contributors/<slug>/` and resolves manual `?type=contributor` links. **No new function** — still 10 of 12.
+- `vercel.json`: `/contributors/:slug` rewrites to the contributor page. `vite.config.js`: the three new pages added.
+- **Menu:** "Contributors" added after Writers on all 26 pages that carry the menu, plus the 3 new ones (the two dead backup homepages left untouched).
+- **Menu fix that came with it:** seven items wrap onto two lines below ~840px wide and pushed the page sideways on tablets (measured, not guessed: 601–820px wrapped; 840px+ fit). `css/swg.css` now switches to the menu button below 860px instead of 600px. Checked at 390 / 601 / 768 / 859 / 861 / 1280px: one line or menu button at every width, no sideways scroll.
+- Checked: every new script parses; every imported name is a real export; the card builder tested with sample data (editor text, plain text, no photo). **Not checked:** a full `npm run build` — the Linux sandbox on Rick's machine can't run the Windows-installed build tools. Run it below.
+
+**Added the same evening — Contributor Work (Rick's decisions, 2026-11-12):** contributors' writing **never runs on The Porch**. It gets its own archive, and every piece links back to its author's Contributors page. Name: **"Contributor Work"**. **A piece can credit more than one contributor** (Rick: "probably able to credit two people").
+- New pages: `contributors/work/index.html` (every piece, newest first) and `contributors/work/piece/index.html` (one piece, modeled on the Porch story page: title, date, "by" line with each name linking to that contributor's page, picture, text, the Porch's book/gaps spacing choice, then "More from [name]" with up to 3 other pieces per credited contributor).
+- Each contributor's page now ends with **"Their work"**: every piece that credits them, newest first, filled in by itself.
+- The Contributors page footer now has "Contributor work →" beside "Every contributor →". No menu item.
+- `js/sanity.js`: `fetchAllContributorWork()`, `fetchContributorWorkBySlug()`, `fetchWorkByContributor(id, excludeId)`, `contributorCredit()` ("A", "A & B", "A, B & C"), `renderWorkCard()` (same picture treatment as Porch cards).
+- `api/preview-doc.js` gains `contributorWork`; `api/preview.js` allows `/contributors/work/<slug>/` and resolves `?type=contributorWork`. Still 10 of 12 functions.
+- `vercel.json`: `/contributors/work/:slug` → the piece page. `vite.config.js`: both new pages.
+- Checked: scripts parse, imports are real exports, credit line and card tested with sample data (one, two and three contributors, editor text and plain text). Not checked: `npm run build` (same reason as above).
+
+**Claude Code — do these in order:**
+
+1. Run the repo-location check from CLAUDE.md for the site repo.
+2. **Studio repo** (`C:\Users\Rick\Desktop\EZ\SWG\southern-writers-guild`). Read `schemaTypes/event.js`, `schemaTypes/text-fields.js`, `schemaTypes/site-page-copy.js` (or whatever file defines `sitePageCopy`), `schemaTypes/index.js`, and the Presentation Tool / structure config first. Copy Event's conventions (structure, previews, slug validation, ordering) unless this list says otherwise.
+   - New `schemaTypes/contributor.js`, type name **`contributor`**, title "Contributor". Field names must match exactly — the website reads them:
+     - `name` — `writingField` (Rick's standing rule: full editor anywhere typing happens; see entry 2026-11-02 (10)). Title "Name".
+     - `slug` — slug, generated from the **plain words** of `name` (the value is editor blocks, so the slug source must flatten it to text). Same validation as Event's slug.
+     - `photo` — image, `hotspot: true`. Title "Photo". Description: "Click the photo and drag the circle onto the face — cards crop to a tall frame around that spot."
+     - `shortLine` — `writingField`. Title "Short line under the name". Description: "e.g. Poet · Asheville".
+     - `bio` — `writingField`. Title "Bio".
+     - `joinedDate` — date. Title "Date they joined". Initial value today. Description: "Sets the order on the page: newest first."
+     - `link` — object, title "Link to their site or book (optional)": `url` (url, http/https) titled "Address", and `label` (`writingField`) titled "Button wording", description "Leave empty for: More of their work →".
+     - `gallery` — array of images (`hotspot: true`). Title "Extra pictures (optional)".
+     - `featured` — boolean. Title "Show on the main Contributors page". Initial value `true`. Description: "Off = only in the Every contributor archive."
+     - No hard blocks anywhere (warnings, not errors), except what Event's slug already does.
+     - Preview: title = plain words of `name`, subtitle = plain words of `shortLine`, media = `photo`. Ordering: `joinedDate` newest first.
+   - Register it in `schemaTypes/index.js`; if the desk structure is custom, list **Contributor right after Event**.
+   - `sitePageCopy`: add, next to the Events fields: `contributorsTagline` (`writingField`, title "Contributors: line under the heading", initial "The writers the Guild endorses"), `contributorsEmptyMessage` (`writingField`, title "Contributors: message before anyone is listed", initial "The porch is being swept. Contributors arrive soon."), `contributorsMetaDescription` (same kind of field as `eventsMetaDescription` — plain on purpose, search engines can't show formatting).
+   - Presentation Tool: add `contributor` alongside `event` — a contributor resolves to `/contributors/<slug>/`, and the Contributors listing `/contributors/` shows in its locations. Add `/contributors/` to `sitePageCopy`'s locations too.
+   - New `schemaTypes/contributor-work.js`, type name **`contributorWork`**, title "Contributor Work". **Start from `schemaTypes/porch-story.js`** — copy its title, slug, date (`publishedAt`), `thumbnail`, `excerpt`, `body` and `layout` fields exactly (same field kinds, same body block definition, same Show-on-homepage-style help where it applies), so writing a piece feels identical to writing a Porch story. Field names must stay `title`, `slug`, `publishedAt`, `thumbnail`, `excerpt`, `body`, `layout` — the website reads them.
+     - **Leave out** everything that ties a story to the Porch, homepage, Circular or Substack (featured / homepage switches, `isCircular`, `essayFeatured`, `substackUrl`, the plain-text `authors` box and anything similar). Contributor Work never appears on those surfaces.
+     - **Add** `contributors` — an array of references to `contributor`, title "Contributors", description "Pick everyone who should be credited. Their names link to their Contributors pages, and this piece shows up on each of their pages." A warning (not an error) if it's empty.
+     - Preview: title = plain words of `title`, subtitle = the credited contributors' names, media = `thumbnail`. Ordering: newest `publishedAt` first.
+     - Register it; in a custom desk structure, list it **right after Contributor**.
+     - Presentation Tool: a piece resolves to `/contributors/work/<slug>/`; `/contributors/work/` shows in its locations.
+   - Commit, push, then `npx sanity@latest schema deploy` and `npx sanity deploy`. Confirm the new type with `get_schema` against `_.schemas.default` (see CLAUDE.md's gotcha note).
+   - Optional, only if `sitePageCopy` has **no** unpublished draft: set the two new wording fields on the published document to the initial values above, so the partners see wording to edit instead of empty boxes. If a draft exists, don't touch it — tell Rick.
+3. **Site repo:** `npm run build` (must pass). Commit: the `contributors/` folder, `js/sanity.js`, `css/swg.css`, `api/preview.js`, `api/preview-doc.js`, `vercel.json`, `vite.config.js`, the 26 menu pages, `CLAUDE.md` (menu note updated to seven items), and `PROJECT_LOG.md` (it also carries entry 2026-11-02 (10), written earlier and never committed — commit it too). Leave the untracked `.claude/`, `Claude outputs/` and `SCOPE_STORY_DISPLAY.md` alone. Push to `main`.
+4. **Check live, after the deploy:**
+   - `/contributors/` loads, shows the menu with Contributors highlighted, and the empty message.
+   - `/contributors/archive/` loads ("No contributors yet.").
+   - `/contributors/nobody/` shows "Contributor not found", not the 404 page.
+   - `/contributors/work/` loads ("No contributor work yet."); `/contributors/work/nothing/` shows "Piece not found"; the Contributors page shows both footer links.
+   - Studio: Contributor Work sits after Contributor; its Contributors box lets you pick more than one person.
+   - The menu reads THE PORCH · THE WORK · EVENTS · THE HOUSE · WRITERS · CONTRIBUTORS · JOIN on the homepage, an event page and a writer page.
+   - At 768px wide the menu button shows and opens with all seven items.
+   - Studio shows the Contributor section after Event.
+   - **Do not publish a test contributor or piece** — anything published is public. The first real one gets checked when the partners publish it.
+5. Add a "Done" line to this entry with both commit ids and what was checked.
+
+**Scope checklist** (status as of this entry):
+
+| Surface | Status |
+|---|---|
+| Contributors main page | written, untested live |
+| Contributors archive | written, untested live |
+| Each contributor's own page | written, untested live |
+| Menu on all 26 pages + new pages | written, untested live |
+| Tablet menu switch (860px) | written, tested in a local render |
+| Private preview / click-to-edit | written, untested live |
+| Contributor Work archive | written, untested live |
+| Contributor Work piece page (credit links, More from) | written, untested live |
+| "Their work" on each contributor's page | written, untested live |
+| Contributor section in Sanity | handed to Claude Code |
+| Contributor Work section in Sanity | handed to Claude Code |
+| Contributors wording in Site Page Copy | handed to Claude Code |
+| Presentation Tool locations | handed to Claude Code |
+| Homepage | not applicable (Events isn't on it) |
+
+---
+
+## 2026-11-02 (10) — Decision: one-line Circular boxes become full editors before Issue 3 (Open, NOT started)
+
+Rick decided Issue 2 goes out as it is now. **Before Issue 3**, every one-line Circular typing box (the `lineField` boxes: headings, the line under the heading, titles, labels, bylines, button labels and similar) should become a full editor like the writing boxes (`writingField`), in line with his site-wide rule: "There should be a full editing block anywhere where typing is supposed to happen."
+- Things to settle when this is built:
+  - Several paragraphs typed into a box meant for one line must still display cleanly on the web page and in the email (for example, joined into one line or allowed to wrap as a short block).
+  - The email subject and preview line stay plain on purpose, because email programs can't show formatting there.
+- Do this alongside the site-wide audit of plain typing boxes in other Sanity forms (homepage hero, House, Join, Welcome, page copy, excerpts). Bring Rick the list before changing anything.
+
+---
+
 ## 2026-11-02 (9) — Circular "line under the heading" now reads exactly like the masthead tagline (live — site `f20ad8f`, pushed and checked by Claude Code the same day)
 
 The 14pt upright version from (8) didn't look right to Rick. He asked for the line (e.g. "What we've been getting into.") to read exactly like "Stories worth passing around." under the masthead.
