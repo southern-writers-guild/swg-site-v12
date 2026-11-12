@@ -80,13 +80,13 @@ Read this at the start of any SWG session, same as `CLAUDE.md`.
 |---|---|
 | Contributors main page | live, checked 2026-11-12 (empty states) |
 | Contributors archive | live, checked 2026-11-12 (empty states) |
-| Each contributor's own page | live, checked 2026-11-12 (empty states) |
-| Menu on all 26 pages + new pages | live, checked 2026-11-12 (empty states) |
+| Each contributor's own page | deployed; only the not-found state checked, needs a real contributor/piece |
+| Menu on all 26 pages + new pages | live, checked on homepage, Events, Writers and the new pages |
 | Tablet menu switch (860px) | live, checked at 768px |
-| Private preview / click-to-edit | live, checked 2026-11-12 (empty states) |
+| Private preview / click-to-edit | deployed, not tested (needs a draft in Studio)|
 | Contributor Work archive | live, checked 2026-11-12 (empty states) |
-| Contributor Work piece page (credit links, More from) | live, checked 2026-11-12 (empty states) |
-| "Their work" on each contributor's page | live, checked 2026-11-12 (empty states) |
+| Contributor Work piece page (credit links, More from) | deployed; only the not-found state checked, needs a real contributor/piece |
+| "Their work" on each contributor's page | deployed; only the not-found state checked, needs a real contributor/piece |
 | Contributor section in Sanity | live (deployed 2026-11-12) |
 | Contributor Work section in Sanity | live (deployed 2026-11-12) |
 | Contributors wording in Site Page Copy | live (deployed 2026-11-12) |
