@@ -6,6 +6,22 @@ Read this at the start of any SWG session, same as `CLAUDE.md`.
 
 ---
 
+## 2026-11-20 — Site analytics installed: Google Analytics 4 (Guild-owned) and Vercel Web Analytics
+
+**What changed (2026-11-20, Cowork, with Rick directing).** The Guild site now has visit tracking. Before today nothing measured it: the only Google Analytics account (under Rick's personal Gmail) tracks rick-west.com, and Vercel Web Analytics was off.
+
+**Google Analytics 4 is owned by the Guild's Google account, not Rick's.** Rick's explicit call: nothing Guild-related goes in his personal name. Account "Southern Writers Guild", property "Southern Writers Guild website", web data stream for southernwritersguild.com, Measurement ID G-03SXF8Y83F, created while signed in as southernwritersguild.us@gmail.com. The data-sharing options Google pre-ticks (modeling and benchmarking, business recommendations) were switched off.
+
+**The code.** One self-contained line (an IIFE) was appended to the end of js/nav.js, which 31 of the 33 live pages load. The identical line was added inside the first inline script of welcome/index.html, because /welcome does not load nav.js and it is the single acquisition surface every QR code and back-matter link points to. circular-email/index.html is deliberately left untracked (it is an email-rendering page). The line runs only when the hostname is southernwritersguild.com or www.southernwritersguild.com, so previews, draft and visual-editing sessions, and vercel.app URLs never count. It sets up gtag for the Guild property and loads /_vercel/insights/script.js with the window.va stub. A new page that does not load nav.js needs the same line or it will not be counted.
+
+**Vercel Web Analytics** was enabled on the Hobby plan for project swg-site-v12 (50,000 events a month, 30 days of history, no custom events). Google Analytics is the record; Vercel is the free cross-check.
+
+**Commits, both pushed straight to main:** js/nav.js, then welcome/index.html. The nav.js commit message came out garbled because the GitHub web editor's Copilot suggestion was merged into it; cosmetic only.
+
+**Verified:** on the live /welcome page the Vercel script loaded and its pageview call fired. Google's tag is on the page and the dataLayer populated, but gtag.js did not download in the automated browser (almost certainly a content blocker there), so no Google real-time hit was seen. NOT yet confirmed from a clean browser. Google says first data can take up to 48 hours.
+
+**Open:** (1) Add Polk and Grace as users on the Google Analytics account; needs their Google account emails. (2) Confirm Google receives hits from a browser with no blocker (phone, then Realtime). (3) Tag outbound links from WSWG, Instagram, TikTok, YouTube and Kit with UTM parameters so referred visits can be attributed. (4) Once Stripe is live, add GA events for the Kit sign-up on /welcome and for token or card purchases (Vercel Hobby cannot do custom events). (5) The forward-plan document in Drive ("Southern Writers Guild — Forward Plan") now describes this under Measures.
+
 ## 2026-11-12 — Contributors page + Contributor Work: website side written; Sanity side + deploy HANDED TO CLAUDE CODE (NOT yet live)
 
 **What Rick decided (2026-11-12):** after talking with the group, the Guild is adding a **Contributors** page, modeled on Events, archive and all. Contributors arrive one at a time (1, then 2, then 3...), eventually well past 6, so the archive is built now. **It goes in the top menu, as its own page — Rick's explicit call** (this settles the "raise a seventh menu item first" note in CLAUDE.md; that note can now say seven). Rick approved these boxes for each contributor: name, photo, short line under the name, bio, date they joined (sets the order, newest first), link to their site or book (optional), extra pictures (optional), "Show on the main Contributors page" switch.
