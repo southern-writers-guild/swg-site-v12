@@ -89,3 +89,6 @@
     footers[i].textContent = footers[i].textContent.replace(/©\s*\d{4}/, '© ' + new Date().getFullYear());
   }
 })();
+
+// Analytics: Google Analytics 4 (Guild property G-03SXF8Y83F) and Vercel Web Analytics. Runs on the live site only, never on previews.
+(function(){var h=location.hostname;if(h!=='southernwritersguild.com'&&h!=='www.southernwritersguild.com')return;window.dataLayer=window.dataLayer||[];window.gtag=function(){window.dataLayer.push(arguments);};window.gtag('js',new Date());window.gtag('config','G-03SXF8Y83F');var g=document.createElement('script');g.async=true;g.src='https://www.googletagmanager.com/gtag/js?id=G-03SXF8Y83F';document.head.appendChild(g);window.va=window.va||function(){(window.vaq=window.vaq||[]).push(arguments);};var v=document.createElement('script');v.defer=true;v.src='/_vercel/insights/script.js';document.head.appendChild(v);})();
