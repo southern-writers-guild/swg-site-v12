@@ -6,6 +6,17 @@ Read this at the start of any SWG session, same as `CLAUDE.md`.
 
 ---
 
+## 2026-11-22 (2) — Events: large blocks now show the event's Body text (Claude Code)
+
+Rick approved. Files: `js/sanity.js` (`renderEventFeature`), `events/index.html` (two small style lines).
+
+- Under the price and Tickets button, the large block renders the event's Body with the same renderer the event page uses (`renderPortableText`), inside a `.prose` wrapper (site body font, existing colors, 66-character line length). Normal paragraphs, headings, lists, links and poetry blocks are all handled (poetry keeps its spaces and line breaks). Small cards and the archive are untouched. Under 768px the Body sits under the details, below the stacked flyer.
+- No Body, an empty Body, or one holding only blank lines renders nothing at all: no wrapper, no gap (the output is identical to before).
+- **Checked** (`npm run build` passes; built site previewed at 1280, 768 and 390px): tested the renderer on made-up data (a paragraph with markup characters, a poetry block, a missing Body, an empty one, a blank-only one). No console errors, no sideways scroll, text below the flyer on the narrow widths, no Body on any small card.
+- **Not checked:** the "no Body shows no extra space" case in the browser against live data, because the live Dec 12 event (Bourbon & Books) turned out to have a Body already (6 paragraphs, bold text and a "this form" link), so the page now shows it. The no-Body case was checked on the renderer's output only. Nothing was added to Sanity.
+
+---
+
 ## 2026-11-22 — Events page redesign: whole flyers, large upcoming blocks, grid of four (Claude Code)
 
 Rick approved every point. Files: `js/sanity.js`, `events/index.html`, `events/archive/index.html`. Before this, the studio repo's Events ordering commit (`f2bb09e`) and the site's `f4ec892` were pushed, the schema and studio redeployed (`swg-studio.sanity.studio`).

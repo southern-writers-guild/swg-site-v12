@@ -225,6 +225,10 @@
      const img = thumb
        ? `<img src="${esc(thumb)}" alt="${esc(event.title)}" style="width:100%;height:auto;display:block;">`
        : `<div style="aspect-ratio:16/9;background:var(--bg-3);"></div>`
+     // Body (rich text, incl. poetry blocks) via the same renderer the
+     // event page uses. Nothing at all when it's missing, or only blank
+     // lines -- no wrapper, no gap.
+     const bodyHtml = renderPortableText(event.body).replace(/<p class="empty">&nbsp;<\/p>/g, '').trim()
      return `
        <div class="card event-feature">
          <a href="${esc(href)}" class="event-feature-flyer">${img}</a>
@@ -235,6 +239,7 @@
            ${event.timeRange ? `<p class="card-body">${esc(event.timeRange)}</p>` : ''}
            ${event.priceInfo ? `<p class="card-body">${esc(event.priceInfo)}</p>` : ''}
            ${event.ticketUrl ? `<a href="${esc(event.ticketUrl)}" target="_blank" rel="noopener" class="btn btn--primary" style="margin-top:0.5rem;">Tickets</a>` : ''}
+           ${bodyHtml ? `<div class="prose event-feature-text">${bodyHtml}</div>` : ''}
          </div>
        </div>`
    }
