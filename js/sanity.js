@@ -160,18 +160,19 @@
    }
 
    /* ── Events ─────────────────────────────────────────────────── */
-   /* Forward-looking, so sorted soonest-first rather than newest-first
-      like everything else on the site. */
+   /* Newest first, like everything else on the site: the event with the
+      latest date leads. The main Events page shows the 6 most recent;
+      the archive shows every event in the same order. */
 
-   export async function fetchEvents(limit = 9) {
+   export async function fetchEvents(limit = 6) {
      return sanityFetch(
-       `*[_type == "event" && (featured == true || !defined(featured))] | order(eventDate asc) [0...${limit}]`
+       `*[_type == "event" && (featured == true || !defined(featured))] | order(eventDate desc) [0...${limit}]`
      )
    }
 
    export async function fetchAllEvents() {
      return sanityFetch(
-       `*[_type == "event"] | order(eventDate asc)`
+       `*[_type == "event"] | order(eventDate desc)`
      )
    }
 

@@ -107,7 +107,7 @@
     import { fetchEvents, renderEventCard, showLoading, showError, fetchSitePageCopy } from '../js/sanity.js'
     const grid = document.getElementById('events-grid')
     showLoading(grid)
-    fetchEvents(9)
+    fetchEvents(6)
       .then(events => {
         if (!events || !events.length) {
           showError(grid, 'No events on the calendar right now — check back soon.')
