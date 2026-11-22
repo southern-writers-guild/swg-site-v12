@@ -6,6 +6,19 @@ Read this at the start of any SWG session, same as `CLAUDE.md`.
 
 ---
 
+## 2026-11-22 — Events page redesign: whole flyers, large upcoming blocks, grid of four (Claude Code)
+
+Rick approved every point. Files: `js/sanity.js`, `events/index.html`, `events/archive/index.html`. Before this, the studio repo's Events ordering commit (`f2bb09e`) and the site's `f4ec892` were pushed, the schema and studio redeployed (`swg-studio.sanity.studio`).
+
+- **Flyers never cropped.** `renderEventCard` image is now `width:100%;height:auto`, no aspect-ratio or object-fit. The grey 16:9 placeholder stays for events with no image.
+- **New `renderEventFeature(event)`** — large two-column block: whole flyer left (`thumbSrc(event, 1400)`), right: date and venue line, title, subtitle, time, price, and a "Tickets" button only when the event has a ticket link (new tab, `noopener`). Flyer and title both link to the event page; they're siblings, not nested links. Stacks under 768px, flyer first.
+- **Front page (`/events/`)** fetches 50 and splits in the browser using the visitor's local date (an event's own day counts as upcoming). Upcoming soonest first, first 3 are large blocks. With nothing upcoming, the newest past event is the one large block. Under them a grid of exactly 4: upcoming overflow first, then past events newest first; 2 columns on desktop, each card flyer-left/details-right; 1 column and stacked under 768px. `renderEventCard(event, { row: true })` is the small-card variant; the archive still uses the default stacked card.
+- **Archive** keeps `fetchAllEvents()` and 3 columns; `align-items:start` added so tall and short flyers don't stretch.
+- **Checked** (`npm run build` passes; built site previewed at 1280, 768 and 390px): on both pages every flyer's displayed shape equals its real shape (none cropped), no sideways scroll, no console errors. Front-page order today is Dec 12 (large), then Oct 20, Sep 26, Sep 12, Aug 15. Archive order same, 3 columns at 1280, 2 at 768, 1 at 390. Tickets button: absent for Dec 12 (it has no ticket link), present with a link, and no nested links — tested on the render function with sample data. The 3-upcoming, overflow and none-upcoming paths were run on made-up dates only, since the live data has one upcoming event.
+- **Noticed:** at 768px and 390px a tall flyer like Dec 12 (portrait) fills the whole width, so it's about 1.5 times as tall as it is wide — that's the "never cropped, stacked" rule working as written, but it makes that page long on a phone. Not changed.
+
+---
+
 ## 2026-11-20 — Site analytics installed: Google Analytics 4 (Guild-owned) and Vercel Web Analytics
 
 **What changed (2026-11-20, Cowork, with Rick directing).** The Guild site now has visit tracking. Before today nothing measured it: the only Google Analytics account (under Rick's personal Gmail) tracks rick-west.com, and Vercel Web Analytics was off.
@@ -89,6 +102,7 @@ Read this at the start of any SWG session, same as `CLAUDE.md`.
 **Done 2026-11-12 (Claude Code) — LIVE.** Studio repo commit `f915447` (new `contributor` and `contributorWork` types, registered after Event; `contributorsTagline` / `contributorsEmptyMessage` as editor boxes plus plain `contributorsMetaDescription` in Site Page Copy; Presentation routes and locations, with `/contributors/work/:slug` listed ahead of `/contributors/:slug`). `sanity schema deploy` and `sanity deploy` both succeeded; `sanity schema list` shows `_.schemas.default`. (The Sanity connector lacked read permission for this account, so the type-level `get_schema` check couldn't run; the live site reading the new Site Page Copy wording back confirms the deploy.) Site repo commit `017788b`; `npm run build` passed. Site Page Copy had no draft, so the tagline and empty-message wording were set on the published document.
 - Checked live: `/contributors/` (menu highlighted, tagline from Sanity, empty message, both footer links), `/contributors/archive/` ("No contributors yet."), `/contributors/nobody/` ("Contributor not found"), `/contributors/work/` ("No contributor work yet."), `/contributors/work/nothing/` ("Piece not found"); menu reads the seven items on homepage, Events and Writers; at 768px the menu button shows and opens with all seven, no sideways scroll.
 - Not checked: Studio screens by eye (the Contributors box accepting more than one person, Contributor Work sitting after Contributor) — the types are deployed but not opened in the Studio UI. No test contributor or piece was published. Note: the Studio has no custom desk structure, so ordering follows the type list (Event, Contributor, Contributor Work).
+- **Checked afterwards by Cowork, same evening, in the Studio (Rick's Chrome):** Contributor and Contributor Work sit right after Event; a blank Contributor Work form shows the Contributors box as a list with "Add item", so a piece can credit more than one person. Form closed without typing; no draft was created (list still empty). Live `/contributors/` re-read: seven-item menu, "The writers the Guild endorses", empty message, both footer links.
 
 **Scope checklist** (status as of this entry):
 

@@ -30,11 +30,25 @@
     }
     .events-divider { border: none; border-top: 1px solid var(--border); margin: 0; }
     .events-grid-wrap { padding: 44px 60px 0; }
-    #events-grid {
+    .event-features { display: grid; gap: 24px; }
+    .event-feature {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 24px;
+      grid-template-columns: 1fr 1fr;
+      gap: 32px;
+      align-items: start;
     }
+    .event-feature-flyer { display: block; }
+    .event-feature-body .card-title { font-size: 1.8rem; margin: 0.25rem 0 0.75rem; }
+    .event-small-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px;
+      margin-top: 24px;
+      align-items: start;
+    }
+    .event-card--row { display: flex; gap: 1.25rem; align-items: flex-start; }
+    .event-card-flyer { flex: 0 0 48%; min-width: 0; }
+    .event-card-text { flex: 1; min-width: 0; }
     .events-footer {
       padding: 40px 60px 56px;
       display: flex;
@@ -53,7 +67,10 @@
     @media (max-width: 768px) {
       .events-header { padding: 36px 24px 12px; flex-direction: column; align-items: flex-start; gap: 16px; }
       .events-grid-wrap { padding: 32px 24px 0; }
-      #events-grid { grid-template-columns: 1fr; }
+      .event-feature { grid-template-columns: 1fr; gap: 20px; }
+      .event-small-grid { grid-template-columns: 1fr; }
+      .event-card--row { flex-direction: column; gap: 0.75rem; }
+      .event-card-flyer { flex: none; width: 100%; }
       .events-footer { padding: 32px 24px 40px; }
     }
   </style>
@@ -104,16 +121,47 @@
   </footer>
 
   <script type="module">
-    import { fetchEvents, renderEventCard, showLoading, showError, fetchSitePageCopy } from '../js/sanity.js'
+    import { fetchEvents, renderEventCard, renderEventFeature, showLoading, showError, fetchSitePageCopy } from '../js/sanity.js'
     const grid = document.getElementById('events-grid')
+
+    // Visitor's local date as YYYY-MM-DD (not toISOString, which is UTC).
+    function localToday() {
+      const d = new Date()
+      const p = n => String(n).padStart(2, '0')
+      return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate())
+    }
+
+    // Upcoming (today counts) soonest first; the first 3 are large blocks.
+    // With nothing upcoming, the newest past event takes the large slot.
+    // The grid of 4 fills from upcoming overflow, then past newest first.
+    function layoutEvents(events) {
+      const today = localToday()
+      const upcoming = events.filter(e => e.eventDate && e.eventDate >= today)
+        .sort((a, b) => a.eventDate.localeCompare(b.eventDate))
+      let past = events.filter(e => !(e.eventDate && e.eventDate >= today)) // already newest first
+      let large = upcoming.slice(0, 3)
+      let overflow = upcoming.slice(3)
+      if (!large.length) {
+        large = past.slice(0, 1)
+        past = past.slice(1)
+      }
+      const small = overflow.concat(past).slice(0, 4)
+      return { large, small }
+    }
+
     showLoading(grid)
-    fetchEvents(6)
+    fetchEvents(50)
       .then(events => {
         if (!events || !events.length) {
           showError(grid, 'No events on the calendar right now — check back soon.')
           return
         }
-        grid.innerHTML = events.map(renderEventCard).join('')
+        const { large, small } = layoutEvents(events)
+        grid.innerHTML =
+          `<div class="event-features">${large.map(renderEventFeature).join('')}</div>` +
+          (small.length
+            ? `<div class="event-small-grid">${small.map(e => renderEventCard(e, { row: true })).join('')}</div>`
+            : '')
       })
       .catch(() => showError(grid, 'Events unavailable.'))
 

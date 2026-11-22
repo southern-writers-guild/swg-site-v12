@@ -183,20 +183,60 @@
      )
    }
 
-   export function renderEventCard(event) {
+   /* Flyers are never cropped: natural height, full width of their box.
+      Default is the stacked card (archive grid). { row: true } is the
+      small front-page card: flyer left, details right on desktop (the
+      .event-card--row rules live in events/index.html; it stacks on
+      mobile). */
+   export function renderEventCard(event, { row = false } = {}) {
      const thumb = thumbSrc(event, 800)
+     const gap = row ? '0' : '0.75rem'
      const img = thumb
-       ? `<img src="${esc(thumb)}" alt="${esc(event.title)}" style="width:100%;aspect-ratio:16/9;object-fit:cover;display:block;margin-bottom:0.75rem;">`
-       : `<div style="aspect-ratio:16/9;background:var(--bg-3);margin-bottom:0.75rem;"></div>`
+       ? `<img src="${esc(thumb)}" alt="${esc(event.title)}" style="width:100%;height:auto;display:block;margin-bottom:${gap};">`
+       : `<div style="aspect-ratio:16/9;background:var(--bg-3);margin-bottom:${gap};"></div>`
      const hasSlug = Boolean(event.slug && event.slug.current)
      const href = hasSlug ? `/events/${event.slug.current}/` : '#'
-     return `
-       <a href="${esc(href)}" class="card" style="display:block;text-decoration:none;">
-         ${img}
+     const text = `
          <span class="card-label">${esc(formatEventDate(event.eventDate))}${event.venue ? ` &nbsp;·&nbsp; ${esc(event.venue)}` : ''}</span>
          <h2 class="card-title card-title--sm">${esc(event.title)}</h2>
-         ${event.subtitle ? `<p class="card-body" style="font-size:0.9rem;">${esc(event.subtitle)}</p>` : ''}
+         ${event.subtitle ? `<p class="card-body" style="font-size:0.9rem;">${esc(event.subtitle)}</p>` : ''}`
+     if (row) {
+       return `
+       <a href="${esc(href)}" class="card event-card--row" style="text-decoration:none;">
+         <div class="event-card-flyer">${img}</div>
+         <div class="event-card-text">${text}
+         </div>
        </a>`
+     }
+     return `
+       <a href="${esc(href)}" class="card" style="display:block;text-decoration:none;">
+         ${img}${text}
+       </a>`
+   }
+
+   /* Large two-column block: whole flyer left, details right. A div, not
+      an anchor, so the flyer link, title link and Tickets button are
+      siblings (no nested anchors). Layout rules: .event-feature in
+      events/index.html. */
+   export function renderEventFeature(event) {
+     const thumb = thumbSrc(event, 1400)
+     const hasSlug = Boolean(event.slug && event.slug.current)
+     const href = hasSlug ? `/events/${event.slug.current}/` : '#'
+     const img = thumb
+       ? `<img src="${esc(thumb)}" alt="${esc(event.title)}" style="width:100%;height:auto;display:block;">`
+       : `<div style="aspect-ratio:16/9;background:var(--bg-3);"></div>`
+     return `
+       <div class="card event-feature">
+         <a href="${esc(href)}" class="event-feature-flyer">${img}</a>
+         <div class="event-feature-body">
+           <span class="card-label">${esc(formatEventDate(event.eventDate))}${event.venue ? ` &nbsp;·&nbsp; ${esc(event.venue)}` : ''}</span>
+           <h2 class="card-title"><a href="${esc(href)}" style="color:inherit;text-decoration:none;">${esc(event.title)}</a></h2>
+           ${event.subtitle ? `<p class="card-body">${esc(event.subtitle)}</p>` : ''}
+           ${event.timeRange ? `<p class="card-body">${esc(event.timeRange)}</p>` : ''}
+           ${event.priceInfo ? `<p class="card-body">${esc(event.priceInfo)}</p>` : ''}
+           ${event.ticketUrl ? `<a href="${esc(event.ticketUrl)}" target="_blank" rel="noopener" class="btn btn--primary" style="margin-top:0.5rem;">Tickets</a>` : ''}
+         </div>
+       </div>`
    }
 
    function formatEventDate(dateStr) {
